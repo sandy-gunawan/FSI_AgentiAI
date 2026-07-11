@@ -1,0 +1,21 @@
+{
+  "retail": {
+    "min_monthly_income_idr": 5000000,
+    "max_dbr_ratio": 0.4,
+    "min_age": 21,
+    "max_age": 60,
+    "min_credit_score": 580,
+    "max_slik_kol": 2,
+    "sanctions_block": true,
+    "auto_approve_ceiling_idr": 100000000
+  },
+  "sme": {
+    "min_years_operating": 2,
+    "max_ltv_ratio": 0.8,
+    "min_dscr": 1.2,
+    "max_debt_to_equity": 2.5,
+    "min_credit_score": 620,
+    "sanctions_block": true,
+    "requires_human_review": true
+  }
+}

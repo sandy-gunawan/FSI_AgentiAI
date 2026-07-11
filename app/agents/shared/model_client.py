@@ -1,0 +1,124 @@
+"""Shared Microsoft Agent Framework plumbing for the financing demo.
+
+Provides:
+  * a FoundryChatClient factory (Azure AD auth via AzureCliCredential)
+  * AgentRunner — runs an agent, captures token usage into the CostTracker,
+    and writes an audit event for every step (governance).
+  * financing_session() — async context manager that owns the credential +
+    chat client + cost tracker for one financing request.
+"""
+from __future__ import annotations
+
+from contextlib import asynccontextmanager
+import json
+import time
+from typing import Any, Sequence
+
+from azure.identity.aio import DefaultAzureCredential
+from pydantic import BaseModel
+
+from agent_framework import Agent, function_middleware
+from agent_framework.foundry import FoundryChatClient
+
+from app.core.config import get_settings
+from app.governance.audit_log import get_audit_logger
+from app.governance.content_safety import redact_pii
+from app.governance.cost_tracker import CostTracker
+
+
+def _trim(obj: Any, n: int = 260) -> str:
+    """Compact, PII-redacted string of a tool argument/result for the technical log."""
+    try:
+        s = obj if isinstance(obj, str) else json.dumps(obj, ensure_ascii=False, default=str)
+    except Exception:
+        s = str(obj)
+    s = redact_pii(s)
+    return s[:n] + ("…" if len(s) > n else "")
+
+
+def _make_tool_logger(sink: list[dict]):
+    """A function middleware that records every real tool/MCP call into `sink`."""
+
+    @function_middleware
+    async def _mw(context, next):  # noqa: A002 - framework signature
+        name = getattr(getattr(context, "function", None), "name", "tool")
+        t0 = time.perf_counter()
+        await next()
+        ms = round((time.perf_counter() - t0) * 1000, 1)
+        sink.append({
+            "tool": name,
+            "args": _trim(getattr(context, "arguments", None)),
+            "result": _trim(getattr(context, "result", None)),
+            "ms": ms,
+        })
+
+    return _mw
+
+
+class AgentRunner:
+    """Runs Agent Framework agents with governance hooks attached."""
+
+    def __init__(self, client: FoundryChatClient, request_id: str, use_case: str,
+                 cost: CostTracker) -> None:
+        self.client = client
+        self.request_id = request_id
+        self.use_case = use_case
+        self.cost = cost
+        self.audit = get_audit_logger()
+        self.tech: list[dict] = []  # real tool/MCP call log
+
+    async def run(
+        self,
+        *,
+        step: str,
+        name: str,
+        instructions: str,
+        prompt: str,
+        response_format: type[BaseModel] | None = None,
+        tools: Sequence[Any] | None = None,
+    ) -> Any:
+        """Run one agent step. Returns a parsed model (if response_format) or text."""
+        agent = Agent(
+            client=self.client,
+            name=name,
+            instructions=instructions,
+            tools=list(tools) if tools else None,
+            middleware=[_make_tool_logger(self.tech)],
+        )
+        options = {"response_format": response_format} if response_format else None
+        result = await agent.run(prompt, options=options)
+
+        usage = getattr(result, "usage_details", None) or {}
+        in_tok = int(usage.get("input_token_count", 0)) if usage else 0
+        out_tok = int(usage.get("output_token_count", 0)) if usage else 0
+        self.cost.add(in_tok, out_tok)
+
+        detail = redact_pii((result.text or "")[:600])
+        self.audit.record(
+            request_id=self.request_id,
+            use_case=self.use_case,
+            step=step,
+            actor=name,
+            detail=detail,
+            tokens=in_tok + out_tok,
+        )
+        return result.value if response_format else result.text
+
+
+def make_chat_client(credential: DefaultAzureCredential) -> FoundryChatClient:
+    s = get_settings()
+    return FoundryChatClient(
+        project_endpoint=s.foundry_project_endpoint,
+        model=s.foundry_model,
+        credential=credential,
+    )
+
+
+@asynccontextmanager
+async def financing_session(request_id: str, use_case: str):
+    """Own the credential + chat client + cost tracker for one request."""
+    cost = CostTracker(request_id)
+    async with DefaultAzureCredential() as credential:
+        client = make_chat_client(credential)
+        runner = AgentRunner(client, request_id, use_case, cost)
+        yield runner, cost

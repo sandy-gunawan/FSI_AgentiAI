@@ -1,0 +1,362 @@
+{
+  "CUST-1001": [
+    {
+      "account_no": "16665495804",
+      "type": "tabungan",
+      "balance_idr": 40902812,
+      "opened_date": "2023-11-15",
+      "avg_balance_6m_idr": 44373824
+    }
+  ],
+  "CUST-1002": [
+    {
+      "account_no": "16784351990",
+      "type": "tabungan",
+      "balance_idr": 17981035,
+      "opened_date": "2023-06-10",
+      "avg_balance_6m_idr": 16300704
+    }
+  ],
+  "CUST-1003": [
+    {
+      "account_no": "12473062788",
+      "type": "tabungan",
+      "balance_idr": 28022776,
+      "opened_date": "2019-12-31",
+      "avg_balance_6m_idr": 28168374
+    }
+  ],
+  "CUST-1004": [
+    {
+      "account_no": "12536702302",
+      "type": "tabungan",
+      "balance_idr": 54019062,
+      "opened_date": "2020-11-16",
+      "avg_balance_6m_idr": 49127239
+    }
+  ],
+  "CUST-1005": [
+    {
+      "account_no": "16371163768",
+      "type": "tabungan",
+      "balance_idr": 6244343,
+      "opened_date": "2020-03-27",
+      "avg_balance_6m_idr": 6590092
+    }
+  ],
+  "CUST-1006": [
+    {
+      "account_no": "16918947295",
+      "type": "tabungan",
+      "balance_idr": 25329856,
+      "opened_date": "2022-04-03",
+      "avg_balance_6m_idr": 21975701
+    }
+  ],
+  "CUST-1007": [
+    {
+      "account_no": "13897042248",
+      "type": "tabungan",
+      "balance_idr": 59467333,
+      "opened_date": "2023-02-13",
+      "avg_balance_6m_idr": 50574974
+    }
+  ],
+  "CUST-1008": [
+    {
+      "account_no": "17278429193",
+      "type": "tabungan",
+      "balance_idr": 26726254,
+      "opened_date": "2023-03-06",
+      "avg_balance_6m_idr": 20811186
+    }
+  ],
+  "CUST-1009": [
+    {
+      "account_no": "15669686600",
+      "type": "tabungan",
+      "balance_idr": 10981733,
+      "opened_date": "2023-02-06",
+      "avg_balance_6m_idr": 8121514
+    }
+  ],
+  "CUST-1010": [
+    {
+      "account_no": "15625697920",
+      "type": "tabungan",
+      "balance_idr": 83192295,
+      "opened_date": "2025-06-26",
+      "avg_balance_6m_idr": 68419386
+    }
+  ],
+  "CUST-1011": [
+    {
+      "account_no": "17414861646",
+      "type": "tabungan",
+      "balance_idr": 13491810,
+      "opened_date": "2025-06-21",
+      "avg_balance_6m_idr": 13882084
+    }
+  ],
+  "CUST-1012": [
+    {
+      "account_no": "12052356707",
+      "type": "tabungan",
+      "balance_idr": 33436179,
+      "opened_date": "2023-02-09",
+      "avg_balance_6m_idr": 27392982
+    }
+  ],
+  "CUST-1013": [
+    {
+      "account_no": "14437693057",
+      "type": "tabungan",
+      "balance_idr": 130706055,
+      "opened_date": "2018-12-12",
+      "avg_balance_6m_idr": 111351077
+    }
+  ],
+  "CUST-1014": [
+    {
+      "account_no": "15681181321",
+      "type": "tabungan",
+      "balance_idr": 148640592,
+      "opened_date": "2023-06-05",
+      "avg_balance_6m_idr": 109823086
+    }
+  ],
+  "CUST-1015": [
+    {
+      "account_no": "14199527844",
+      "type": "tabungan",
+      "balance_idr": 13215144,
+      "opened_date": "2021-07-04",
+      "avg_balance_6m_idr": 13288841
+    }
+  ],
+  "CUST-1016": [
+    {
+      "account_no": "18897886186",
+      "type": "tabungan",
+      "balance_idr": 9888463,
+      "opened_date": "2021-07-30",
+      "avg_balance_6m_idr": 7965842
+    }
+  ],
+  "CUST-1017": [
+    {
+      "account_no": "13448737038",
+      "type": "tabungan",
+      "balance_idr": 51376041,
+      "opened_date": "2022-07-17",
+      "avg_balance_6m_idr": 48809308
+    }
+  ],
+  "CUST-1018": [
+    {
+      "account_no": "11700349544",
+      "type": "tabungan",
+      "balance_idr": 28025121,
+      "opened_date": "2022-11-25",
+      "avg_balance_6m_idr": 30685654
+    }
+  ],
+  "CUST-1019": [
+    {
+      "account_no": "11185078029",
+      "type": "tabungan",
+      "balance_idr": 30546852,
+      "opened_date": "2020-12-27",
+      "avg_balance_6m_idr": 27140553
+    }
+  ],
+  "CUST-1020": [
+    {
+      "account_no": "14191823459",
+      "type": "tabungan",
+      "balance_idr": 98038816,
+      "opened_date": "2021-05-15",
+      "avg_balance_6m_idr": 102008797
+    }
+  ],
+  "CUST-1021": [
+    {
+      "account_no": "19740852319",
+      "type": "tabungan",
+      "balance_idr": 87510691,
+      "opened_date": "2021-10-09",
+      "avg_balance_6m_idr": 86343218
+    }
+  ],
+  "CUST-1022": [
+    {
+      "account_no": "14476538329",
+      "type": "tabungan",
+      "balance_idr": 43426394,
+      "opened_date": "2021-05-14",
+      "avg_balance_6m_idr": 34160649
+    }
+  ],
+  "CUST-1023": [
+    {
+      "account_no": "13532597733",
+      "type": "tabungan",
+      "balance_idr": 13639884,
+      "opened_date": "2023-07-02",
+      "avg_balance_6m_idr": 11411668
+    }
+  ],
+  "CUST-1024": [
+    {
+      "account_no": "17751866203",
+      "type": "tabungan",
+      "balance_idr": 37939164,
+      "opened_date": "2021-05-14",
+      "avg_balance_6m_idr": 41183184
+    }
+  ],
+  "CUST-1025": [
+    {
+      "account_no": "11747966299",
+      "type": "tabungan",
+      "balance_idr": 26399747,
+      "opened_date": "2024-04-23",
+      "avg_balance_6m_idr": 20863232
+    }
+  ],
+  "CUST-1026": [
+    {
+      "account_no": "13585838199",
+      "type": "tabungan",
+      "balance_idr": 124380830,
+      "opened_date": "2019-08-05",
+      "avg_balance_6m_idr": 112112012
+    }
+  ],
+  "CUST-1027": [
+    {
+      "account_no": "12446656024",
+      "type": "tabungan",
+      "balance_idr": 41736936,
+      "opened_date": "2020-02-27",
+      "avg_balance_6m_idr": 30111839
+    }
+  ],
+  "CUST-1028": [
+    {
+      "account_no": "15952213788",
+      "type": "tabungan",
+      "balance_idr": 30978495,
+      "opened_date": "2024-01-08",
+      "avg_balance_6m_idr": 30372850
+    }
+  ],
+  "CUST-1029": [
+    {
+      "account_no": "16613125332",
+      "type": "tabungan",
+      "balance_idr": 26805086,
+      "opened_date": "2019-07-30",
+      "avg_balance_6m_idr": 23188581
+    }
+  ],
+  "CUST-1030": [
+    {
+      "account_no": "17525449417",
+      "type": "tabungan",
+      "balance_idr": 105231001,
+      "opened_date": "2019-03-02",
+      "avg_balance_6m_idr": 83136380
+    }
+  ],
+  "CUST-1031": [
+    {
+      "account_no": "19523417883",
+      "type": "tabungan",
+      "balance_idr": 49064840,
+      "opened_date": "2025-01-03",
+      "avg_balance_6m_idr": 44349024
+    }
+  ],
+  "CUST-1032": [
+    {
+      "account_no": "14007553989",
+      "type": "tabungan",
+      "balance_idr": 13752414,
+      "opened_date": "2019-09-01",
+      "avg_balance_6m_idr": 14430931
+    }
+  ],
+  "CUST-1033": [
+    {
+      "account_no": "18261461433",
+      "type": "tabungan",
+      "balance_idr": 56248125,
+      "opened_date": "2024-08-27",
+      "avg_balance_6m_idr": 61790192
+    }
+  ],
+  "CUST-1034": [
+    {
+      "account_no": "18592490465",
+      "type": "tabungan",
+      "balance_idr": 40788594,
+      "opened_date": "2024-05-30",
+      "avg_balance_6m_idr": 32668246
+    }
+  ],
+  "CUST-1035": [
+    {
+      "account_no": "11725077567",
+      "type": "tabungan",
+      "balance_idr": 15291807,
+      "opened_date": "2019-04-03",
+      "avg_balance_6m_idr": 12582937
+    }
+  ],
+  "CUST-1036": [
+    {
+      "account_no": "14811634719",
+      "type": "tabungan",
+      "balance_idr": 11767810,
+      "opened_date": "2020-01-11",
+      "avg_balance_6m_idr": 9749798
+    }
+  ],
+  "CUST-1037": [
+    {
+      "account_no": "14836469659",
+      "type": "tabungan",
+      "balance_idr": 6816356,
+      "opened_date": "2025-02-06",
+      "avg_balance_6m_idr": 7331923
+    }
+  ],
+  "CUST-1038": [
+    {
+      "account_no": "16942436457",
+      "type": "tabungan",
+      "balance_idr": 78116629,
+      "opened_date": "2022-03-01",
+      "avg_balance_6m_idr": 76966463
+    }
+  ],
+  "CUST-1039": [
+    {
+      "account_no": "12728502304",
+      "type": "tabungan",
+      "balance_idr": 56028865,
+      "opened_date": "2020-12-11",
+      "avg_balance_6m_idr": 42450138
+    }
+  ],
+  "CUST-1040": [
+    {
+      "account_no": "13231697543",
+      "type": "tabungan",
+      "balance_idr": 37360069,
+      "opened_date": "2023-02-03",
+      "avg_balance_6m_idr": 28341556
+    }
+  ]
+}

@@ -1,0 +1,314 @@
+[
+  {
+    "company_id": "SME-5001",
+    "legal_name": "PT PT Sudiati Tbk",
+    "npwp": "62.118.940.9-325.158",
+    "sector": "retail_trade",
+    "established_year": 2008,
+    "annual_revenue_idr": 85000000000,
+    "employees": 221,
+    "directors": [
+      {
+        "name": "Sutan Galar Padmasari",
+        "nik": "1304427435790007",
+        "ownership_pct": 100,
+        "is_pep": false
+      }
+    ],
+    "collateral_id": "COL-9001"
+  },
+  {
+    "company_id": "SME-5002",
+    "legal_name": "PT PT Thamrin",
+    "npwp": "63.125.703.0-708.736",
+    "sector": "logistics",
+    "established_year": 2012,
+    "annual_revenue_idr": 8000000000,
+    "employees": 103,
+    "directors": [
+      {
+        "name": "Hj. Indah Adriansyah, S.E.I",
+        "nik": "1499766171550666",
+        "ownership_pct": 60,
+        "is_pep": false
+      },
+      {
+        "name": "Rusman Mustofa",
+        "nik": "2506874125777952",
+        "ownership_pct": 40,
+        "is_pep": false
+      }
+    ],
+    "collateral_id": "COL-9002"
+  },
+  {
+    "company_id": "SME-5003",
+    "legal_name": "PT Perum Yuliarti Megantara Tbk",
+    "npwp": "56.156.194.4-628.543",
+    "sector": "logistics",
+    "established_year": 2014,
+    "annual_revenue_idr": 42000000000,
+    "employees": 86,
+    "directors": [
+      {
+        "name": "Kezia Sirait",
+        "nik": "7991625300641368",
+        "ownership_pct": 100,
+        "is_pep": true
+      }
+    ],
+    "collateral_id": "COL-9003"
+  },
+  {
+    "company_id": "SME-5004",
+    "legal_name": "PT CV Mardhiyah Tbk",
+    "npwp": "94.510.590.1-289.334",
+    "sector": "healthcare",
+    "established_year": 2010,
+    "annual_revenue_idr": 15000000000,
+    "employees": 172,
+    "directors": [
+      {
+        "name": "Lasmanto Napitupulu",
+        "nik": "6839648137596331",
+        "ownership_pct": 100,
+        "is_pep": false
+      }
+    ],
+    "collateral_id": "COL-9004"
+  },
+  {
+    "company_id": "SME-5005",
+    "legal_name": "PT PT Yulianti Anggriawan Tbk",
+    "npwp": "73.624.824.3-095.062",
+    "sector": "agriculture",
+    "established_year": 2013,
+    "annual_revenue_idr": 42000000000,
+    "employees": 107,
+    "directors": [
+      {
+        "name": "Among Wibisono",
+        "nik": "9450234712120033",
+        "ownership_pct": 100,
+        "is_pep": false
+      }
+    ],
+    "collateral_id": "COL-9005"
+  },
+  {
+    "company_id": "SME-5006",
+    "legal_name": "PT CV Suryono",
+    "npwp": "05.571.212.0-420.083",
+    "sector": "retail_trade",
+    "established_year": 2011,
+    "annual_revenue_idr": 24000000000,
+    "employees": 320,
+    "directors": [
+      {
+        "name": "Rahmi Permata",
+        "nik": "5017560106133774",
+        "ownership_pct": 60,
+        "is_pep": false
+      },
+      {
+        "name": "Emil Safitri, S.IP",
+        "nik": "5888192310815152",
+        "ownership_pct": 40,
+        "is_pep": false
+      }
+    ],
+    "collateral_id": "COL-9006"
+  },
+  {
+    "company_id": "SME-5007",
+    "legal_name": "PT Perum Hidayanto Simbolon (Persero) Tbk",
+    "npwp": "03.291.459.3-781.683",
+    "sector": "retail_trade",
+    "established_year": 2012,
+    "annual_revenue_idr": 24000000000,
+    "employees": 237,
+    "directors": [
+      {
+        "name": "Ibun Mandasari",
+        "nik": "9026190982970198",
+        "ownership_pct": 60,
+        "is_pep": false
+      },
+      {
+        "name": "Ika Winarno",
+        "nik": "5207349421876415",
+        "ownership_pct": 40,
+        "is_pep": false
+      }
+    ],
+    "collateral_id": "COL-9007"
+  },
+  {
+    "company_id": "SME-5008",
+    "legal_name": "PT UD Napitupulu Hutapea Tbk",
+    "npwp": "00.240.457.7-302.945",
+    "sector": "construction",
+    "established_year": 2008,
+    "annual_revenue_idr": 24000000000,
+    "employees": 363,
+    "directors": [
+      {
+        "name": "Dodo Kuswandari, S.Sos",
+        "nik": "7387974585811813",
+        "ownership_pct": 100,
+        "is_pep": false
+      }
+    ],
+    "collateral_id": "COL-9008"
+  },
+  {
+    "company_id": "SME-5009",
+    "legal_name": "PT PT Hariyah Tbk",
+    "npwp": "70.064.690.9-188.545",
+    "sector": "retail_trade",
+    "established_year": 2019,
+    "annual_revenue_idr": 42000000000,
+    "employees": 44,
+    "directors": [
+      {
+        "name": "Fitriani Kuswandari",
+        "nik": "4662590905536662",
+        "ownership_pct": 60,
+        "is_pep": false
+      },
+      {
+        "name": "Dr. Rahmi Manullang, S.Psi",
+        "nik": "9742921380612743",
+        "ownership_pct": 40,
+        "is_pep": false
+      }
+    ],
+    "collateral_id": "COL-9009"
+  },
+  {
+    "company_id": "SME-5010",
+    "legal_name": "PT UD Situmorang (Persero) Tbk",
+    "npwp": "57.151.085.8-778.608",
+    "sector": "agriculture",
+    "established_year": 2017,
+    "annual_revenue_idr": 85000000000,
+    "employees": 31,
+    "directors": [
+      {
+        "name": "Empluk Wibowo",
+        "nik": "9111142871775402",
+        "ownership_pct": 100,
+        "is_pep": false
+      }
+    ],
+    "collateral_id": "COL-9010"
+  },
+  {
+    "company_id": "SME-5011",
+    "legal_name": "PT PT Rahayu",
+    "npwp": "11.756.082.2-527.320",
+    "sector": "agriculture",
+    "established_year": 2019,
+    "annual_revenue_idr": 15000000000,
+    "employees": 299,
+    "directors": [
+      {
+        "name": "Dr. Chelsea Utama, S.E.I",
+        "nik": "3630741972858063",
+        "ownership_pct": 60,
+        "is_pep": false
+      },
+      {
+        "name": "R. Gatot Hutapea, S.Gz",
+        "nik": "6959929309618414",
+        "ownership_pct": 40,
+        "is_pep": false
+      }
+    ],
+    "collateral_id": "COL-9011"
+  },
+  {
+    "company_id": "SME-5012",
+    "legal_name": "PT CV Yulianti (Persero) Tbk",
+    "npwp": "68.530.055.2-632.162",
+    "sector": "agriculture",
+    "established_year": 2008,
+    "annual_revenue_idr": 42000000000,
+    "employees": 46,
+    "directors": [
+      {
+        "name": "drg. Maras Melani, S.Kom",
+        "nik": "6020029536610998",
+        "ownership_pct": 60,
+        "is_pep": false
+      },
+      {
+        "name": "Rafid Putra",
+        "nik": "0242435195287214",
+        "ownership_pct": 40,
+        "is_pep": false
+      }
+    ],
+    "collateral_id": "COL-9012"
+  },
+  {
+    "company_id": "SME-5013",
+    "legal_name": "PT PD Pranowo (Persero) Tbk",
+    "npwp": "39.283.610.2-361.687",
+    "sector": "agriculture",
+    "established_year": 2010,
+    "annual_revenue_idr": 42000000000,
+    "employees": 116,
+    "directors": [
+      {
+        "name": "Cut Dina Simbolon",
+        "nik": "7643604995894601",
+        "ownership_pct": 60,
+        "is_pep": false
+      },
+      {
+        "name": "Kania Pradana",
+        "nik": "0654724898170955",
+        "ownership_pct": 40,
+        "is_pep": false
+      }
+    ],
+    "collateral_id": "COL-9013"
+  },
+  {
+    "company_id": "SME-5014",
+    "legal_name": "PT Perum Mangunsong",
+    "npwp": "60.912.693.0-156.616",
+    "sector": "logistics",
+    "established_year": 2016,
+    "annual_revenue_idr": 24000000000,
+    "employees": 332,
+    "directors": [
+      {
+        "name": "Puti Oliva Widodo, S.Pt",
+        "nik": "3776426433501153",
+        "ownership_pct": 100,
+        "is_pep": false
+      }
+    ],
+    "collateral_id": "COL-9014"
+  },
+  {
+    "company_id": "SME-5015",
+    "legal_name": "PT PT Gunarto Hardiansyah (Persero) Tbk",
+    "npwp": "17.425.965.4-023.437",
+    "sector": "food_beverage",
+    "established_year": 2018,
+    "annual_revenue_idr": 60000000000,
+    "employees": 252,
+    "directors": [
+      {
+        "name": "Icha Handayani",
+        "nik": "0677047892529802",
+        "ownership_pct": 100,
+        "is_pep": false
+      }
+    ],
+    "collateral_id": "COL-9015"
+  }
+]

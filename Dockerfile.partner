@@ -1,0 +1,14 @@
+# Partner bank (Bank Mitra Sejahtera) — standalone A2A agent service.
+# Independently deployed; NO cloud credentials. Publishes an A2A Agent Card and
+# answers JSON-RPC message/send tasks with a deterministic co-underwriting offer.
+FROM python:3.13-slim
+
+WORKDIR /srv
+ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
+
+RUN pip install "uvicorn[standard]" starlette
+
+COPY partner_service ./partner_service
+
+EXPOSE 8090
+CMD ["uvicorn", "partner_service.app:app", "--host", "0.0.0.0", "--port", "8090"]

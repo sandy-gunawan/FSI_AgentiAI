@@ -1,0 +1,137 @@
+{
+  "COL-9001": {
+    "collateral_id": "COL-9001",
+    "type": "kendaraan",
+    "declared_value_idr": 48442752776,
+    "appraised_value_idr": 45607076344,
+    "location": "Semarang",
+    "condition": "cukup",
+    "owner_ref": "SME-5001"
+  },
+  "COL-9002": {
+    "collateral_id": "COL-9002",
+    "type": "properti",
+    "declared_value_idr": 6221440756,
+    "appraised_value_idr": 5228092746,
+    "location": "Semarang",
+    "condition": "baik",
+    "owner_ref": "SME-5002"
+  },
+  "COL-9003": {
+    "collateral_id": "COL-9003",
+    "type": "kendaraan",
+    "declared_value_idr": 32691325010,
+    "appraised_value_idr": 32493991911,
+    "location": "Bandung",
+    "condition": "baik",
+    "owner_ref": "SME-5003"
+  },
+  "COL-9004": {
+    "collateral_id": "COL-9004",
+    "type": "mesin",
+    "declared_value_idr": 9949211469,
+    "appraised_value_idr": 3482224014,
+    "location": "Bekasi",
+    "condition": "baik",
+    "owner_ref": "SME-5004"
+  },
+  "COL-9005": {
+    "collateral_id": "COL-9005",
+    "type": "kendaraan",
+    "declared_value_idr": 29862204815,
+    "appraised_value_idr": 22826732252,
+    "location": "Tangerang",
+    "condition": "cukup",
+    "owner_ref": "SME-5005"
+  },
+  "COL-9006": {
+    "collateral_id": "COL-9006",
+    "type": "properti",
+    "declared_value_idr": 11695629135,
+    "appraised_value_idr": 8796740301,
+    "location": "Bandung",
+    "condition": "cukup",
+    "owner_ref": "SME-5006"
+  },
+  "COL-9007": {
+    "collateral_id": "COL-9007",
+    "type": "kendaraan",
+    "declared_value_idr": 20196217672,
+    "appraised_value_idr": 19254379772,
+    "location": "Jakarta Selatan",
+    "condition": "baik",
+    "owner_ref": "SME-5007"
+  },
+  "COL-9008": {
+    "collateral_id": "COL-9008",
+    "type": "mesin",
+    "declared_value_idr": 9358571246,
+    "appraised_value_idr": 9005644075,
+    "location": "Depok",
+    "condition": "baik",
+    "owner_ref": "SME-5008"
+  },
+  "COL-9009": {
+    "collateral_id": "COL-9009",
+    "type": "mesin",
+    "declared_value_idr": 20715456932,
+    "appraised_value_idr": 16637109233,
+    "location": "Medan",
+    "condition": "baik",
+    "owner_ref": "SME-5009"
+  },
+  "COL-9010": {
+    "collateral_id": "COL-9010",
+    "type": "mesin",
+    "declared_value_idr": 38345484032,
+    "appraised_value_idr": 37225163387,
+    "location": "Makassar",
+    "condition": "baik",
+    "owner_ref": "SME-5010"
+  },
+  "COL-9011": {
+    "collateral_id": "COL-9011",
+    "type": "mesin",
+    "declared_value_idr": 7309116800,
+    "appraised_value_idr": 5677950750,
+    "location": "Tangerang",
+    "condition": "cukup",
+    "owner_ref": "SME-5011"
+  },
+  "COL-9012": {
+    "collateral_id": "COL-9012",
+    "type": "properti",
+    "declared_value_idr": 25184001736,
+    "appraised_value_idr": 23901118805,
+    "location": "Bekasi",
+    "condition": "baik",
+    "owner_ref": "SME-5012"
+  },
+  "COL-9013": {
+    "collateral_id": "COL-9013",
+    "type": "properti",
+    "declared_value_idr": 31889541567,
+    "appraised_value_idr": 28551391506,
+    "location": "Tangerang",
+    "condition": "baik",
+    "owner_ref": "SME-5013"
+  },
+  "COL-9014": {
+    "collateral_id": "COL-9014",
+    "type": "kendaraan",
+    "declared_value_idr": 17647938866,
+    "appraised_value_idr": 15857515267,
+    "location": "Makassar",
+    "condition": "baik",
+    "owner_ref": "SME-5014"
+  },
+  "COL-9015": {
+    "collateral_id": "COL-9015",
+    "type": "mesin",
+    "declared_value_idr": 38674389042,
+    "appraised_value_idr": 32134616622,
+    "location": "Bekasi",
+    "condition": "cukup",
+    "owner_ref": "SME-5015"
+  }
+}

@@ -1,0 +1,11 @@
+# Slim dependency set for the cloud-hosted surrounding systems
+# (REST back-office + MCP servers). No agent-framework needed here.
+fastapi
+uvicorn[standard]
+starlette
+httpx
+mcp
+pydantic
+pydantic-settings
+python-dotenv
+faker

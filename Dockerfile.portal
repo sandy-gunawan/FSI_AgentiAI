@@ -1,0 +1,18 @@
+# Streamlit portal + Microsoft Agent Framework agents/workflows.
+FROM python:3.13-slim
+
+WORKDIR /srv
+ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 PYTHONPATH=/srv
+
+COPY requirements.txt ./requirements.txt
+RUN pip install -r requirements.txt
+
+COPY app ./app
+COPY mock_services ./mock_services
+
+# Datasets (used by data_access system-of-record reads).
+RUN python mock_services/data/seed.py
+
+EXPOSE 8501
+CMD ["streamlit", "run", "app/portal/Home.py", \
+     "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]

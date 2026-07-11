@@ -1,0 +1,281 @@
+{
+  "CUST-1001": {
+    "customer_id": "CUST-1001",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1002": {
+    "customer_id": "CUST-1002",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1003": {
+    "customer_id": "CUST-1003",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1004": {
+    "customer_id": "CUST-1004",
+    "alerts": [
+      {
+        "alert_id": "ALT-8004",
+        "typology": "unusual_counterparty",
+        "severity": "medium",
+        "detail": "Transaksi dengan pihak lawan yang tidak sesuai profil usaha.",
+        "amount_idr": 95000000,
+        "date": "2026-06-10"
+      }
+    ],
+    "monitoring_risk_rating": "medium"
+  },
+  "CUST-1005": {
+    "customer_id": "CUST-1005",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1006": {
+    "customer_id": "CUST-1006",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1007": {
+    "customer_id": "CUST-1007",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1008": {
+    "customer_id": "CUST-1008",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1009": {
+    "customer_id": "CUST-1009",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1010": {
+    "customer_id": "CUST-1010",
+    "alerts": [
+      {
+        "alert_id": "ALT-9010A",
+        "typology": "structuring",
+        "severity": "high",
+        "detail": "Setoran tunai dipecah di bawah ambang pelaporan (Rp 100 juta) berulang kali.",
+        "amount_idr": 95000000,
+        "date": "2026-07-05"
+      },
+      {
+        "alert_id": "ALT-9010B",
+        "typology": "rapid_movement",
+        "severity": "high",
+        "detail": "Dana masuk lalu segera ditransfer keluar (pass-through) dalam 24 jam.",
+        "amount_idr": 480000000,
+        "date": "2026-07-07"
+      },
+      {
+        "alert_id": "ALT-9010C",
+        "typology": "high_risk_jurisdiction",
+        "severity": "medium",
+        "detail": "Transfer ke/dari yurisdiksi berisiko tinggi (FATF grey list).",
+        "amount_idr": 260000000,
+        "date": "2026-07-09"
+      }
+    ],
+    "monitoring_risk_rating": "high"
+  },
+  "CUST-1011": {
+    "customer_id": "CUST-1011",
+    "alerts": [
+      {
+        "alert_id": "ALT-8011",
+        "typology": "high_risk_jurisdiction",
+        "severity": "low",
+        "detail": "Transfer ke/dari yurisdiksi berisiko tinggi (FATF grey list).",
+        "amount_idr": 95000000,
+        "date": "2026-06-30"
+      }
+    ],
+    "monitoring_risk_rating": "medium"
+  },
+  "CUST-1012": {
+    "customer_id": "CUST-1012",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1013": {
+    "customer_id": "CUST-1013",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1014": {
+    "customer_id": "CUST-1014",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1015": {
+    "customer_id": "CUST-1015",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1016": {
+    "customer_id": "CUST-1016",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1017": {
+    "customer_id": "CUST-1017",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1018": {
+    "customer_id": "CUST-1018",
+    "alerts": [
+      {
+        "alert_id": "ALT-8018",
+        "typology": "rapid_movement",
+        "severity": "medium",
+        "detail": "Dana masuk lalu segera ditransfer keluar (pass-through) dalam 24 jam.",
+        "amount_idr": 120000000,
+        "date": "2026-07-08"
+      }
+    ],
+    "monitoring_risk_rating": "medium"
+  },
+  "CUST-1019": {
+    "customer_id": "CUST-1019",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1020": {
+    "customer_id": "CUST-1020",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1021": {
+    "customer_id": "CUST-1021",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1022": {
+    "customer_id": "CUST-1022",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1023": {
+    "customer_id": "CUST-1023",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1024": {
+    "customer_id": "CUST-1024",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1025": {
+    "customer_id": "CUST-1025",
+    "alerts": [
+      {
+        "alert_id": "ALT-8025",
+        "typology": "structuring",
+        "severity": "low",
+        "detail": "Setoran tunai dipecah di bawah ambang pelaporan (Rp 100 juta) berulang kali.",
+        "amount_idr": 80000000,
+        "date": "2026-06-22"
+      }
+    ],
+    "monitoring_risk_rating": "medium"
+  },
+  "CUST-1026": {
+    "customer_id": "CUST-1026",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1027": {
+    "customer_id": "CUST-1027",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1028": {
+    "customer_id": "CUST-1028",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1029": {
+    "customer_id": "CUST-1029",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1030": {
+    "customer_id": "CUST-1030",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1031": {
+    "customer_id": "CUST-1031",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1032": {
+    "customer_id": "CUST-1032",
+    "alerts": [
+      {
+        "alert_id": "ALT-8032",
+        "typology": "unusual_counterparty",
+        "severity": "medium",
+        "detail": "Transaksi dengan pihak lawan yang tidak sesuai profil usaha.",
+        "amount_idr": 95000000,
+        "date": "2026-07-05"
+      }
+    ],
+    "monitoring_risk_rating": "medium"
+  },
+  "CUST-1033": {
+    "customer_id": "CUST-1033",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1034": {
+    "customer_id": "CUST-1034",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1035": {
+    "customer_id": "CUST-1035",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1036": {
+    "customer_id": "CUST-1036",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1037": {
+    "customer_id": "CUST-1037",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1038": {
+    "customer_id": "CUST-1038",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  },
+  "CUST-1039": {
+    "customer_id": "CUST-1039",
+    "alerts": [
+      {
+        "alert_id": "ALT-8039",
+        "typology": "high_risk_jurisdiction",
+        "severity": "low",
+        "detail": "Transfer ke/dari yurisdiksi berisiko tinggi (FATF grey list).",
+        "amount_idr": 80000000,
+        "date": "2026-06-28"
+      }
+    ],
+    "monitoring_risk_rating": "medium"
+  },
+  "CUST-1040": {
+    "customer_id": "CUST-1040",
+    "alerts": [],
+    "monitoring_risk_rating": "low"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "base_rate_pct": 12.0,
+  "risk_spread_by_grade": {
+    "A": 0.0,
+    "B": 2.0,
+    "C": 4.5,
+    "D": 7.0
+  },
+  "products": [
+    {
+      "product_code": "KTA-STD",
+      "name": "Kredit Tanpa Agunan",
+      "segment": "retail",
+      "min_amount_idr": 5000000,
+      "max_amount_idr": 300000000,
+      "min_tenor_months": 6,
+      "max_tenor_months": 36
+    },
+    {
+      "product_code": "SME-TERM",
+      "name": "Kredit Investasi UKM",
+      "segment": "sme",
+      "min_amount_idr": 100000000,
+      "max_amount_idr": 20000000000,
+      "min_tenor_months": 12,
+      "max_tenor_months": 60
+    },
+    {
+      "product_code": "SME-RC",
+      "name": "Kredit Modal Kerja (Revolving)",
+      "segment": "sme",
+      "min_amount_idr": 100000000,
+      "max_amount_idr": 15000000000,
+      "min_tenor_months": 12,
+      "max_tenor_months": 36
+    }
+  ]
+}

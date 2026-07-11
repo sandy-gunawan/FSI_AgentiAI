@@ -1,0 +1,21 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Environment / secrets
+.env
+*.local
+
+# App runtime state
+data/*.db
+data/*.sqlite
+.checkpoints/
+*.log
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/

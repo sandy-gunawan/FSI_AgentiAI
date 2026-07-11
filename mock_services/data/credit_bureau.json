@@ -1,0 +1,706 @@
+{
+  "individuals": {
+    "CUST-1001": {
+      "credit_score": 712,
+      "risk_grade": "B",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 52003493,
+      "monthly_debt_obligations_idr": 3059029,
+      "active_facilities": [
+        {
+          "type": "KKB",
+          "monthly_payment_idr": 3059029
+        }
+      ],
+      "delinquencies_12m": 0,
+      "enquiries_6m": 4
+    },
+    "CUST-1002": {
+      "credit_score": 592,
+      "risk_grade": "C",
+      "slik_kol": 2,
+      "total_outstanding_debt_idr": 77917404,
+      "monthly_debt_obligations_idr": 4100916,
+      "active_facilities": [
+        {
+          "type": "KTA",
+          "monthly_payment_idr": 4100916
+        }
+      ],
+      "delinquencies_12m": 1,
+      "enquiries_6m": 2
+    },
+    "CUST-1003": {
+      "credit_score": 774,
+      "risk_grade": "B",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 24469032,
+      "monthly_debt_obligations_idr": 1165192,
+      "active_facilities": [
+        {
+          "type": "Kartu Kredit",
+          "monthly_payment_idr": 1165192
+        }
+      ],
+      "delinquencies_12m": 0,
+      "enquiries_6m": 0
+    },
+    "CUST-1004": {
+      "credit_score": 633,
+      "risk_grade": "C",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 62021322,
+      "monthly_debt_obligations_idr": 2819151,
+      "active_facilities": [
+        {
+          "type": "KTA",
+          "monthly_payment_idr": 2819151
+        }
+      ],
+      "delinquencies_12m": 2,
+      "enquiries_6m": 2
+    },
+    "CUST-1005": {
+      "credit_score": 706,
+      "risk_grade": "B",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 11129778,
+      "monthly_debt_obligations_idr": 412214,
+      "active_facilities": [
+        {
+          "type": "KKB",
+          "monthly_payment_idr": 412214
+        }
+      ],
+      "delinquencies_12m": 0,
+      "enquiries_6m": 4
+    },
+    "CUST-1006": {
+      "credit_score": 590,
+      "risk_grade": "C",
+      "slik_kol": 2,
+      "total_outstanding_debt_idr": 12257744,
+      "monthly_debt_obligations_idr": 5300000,
+      "active_facilities": [
+        {
+          "type": "KKB",
+          "monthly_payment_idr": 766109
+        }
+      ],
+      "delinquencies_12m": 2,
+      "enquiries_6m": 3
+    },
+    "CUST-1007": {
+      "credit_score": 557,
+      "risk_grade": "D",
+      "slik_kol": 2,
+      "total_outstanding_debt_idr": 147637334,
+      "monthly_debt_obligations_idr": 5678359,
+      "active_facilities": [
+        {
+          "type": "KTA",
+          "monthly_payment_idr": 5678359
+        }
+      ],
+      "delinquencies_12m": 1,
+      "enquiries_6m": 0
+    },
+    "CUST-1008": {
+      "credit_score": 664,
+      "risk_grade": "C",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 212615360,
+      "monthly_debt_obligations_idr": 5315384,
+      "active_facilities": [
+        {
+          "type": "KTA",
+          "monthly_payment_idr": 5315384
+        }
+      ],
+      "delinquencies_12m": 0,
+      "enquiries_6m": 3
+    },
+    "CUST-1009": {
+      "credit_score": 564,
+      "risk_grade": "D",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 7864220,
+      "monthly_debt_obligations_idr": 561730,
+      "active_facilities": [
+        {
+          "type": "KTA",
+          "monthly_payment_idr": 561730
+        }
+      ],
+      "delinquencies_12m": 3,
+      "enquiries_6m": 2
+    },
+    "CUST-1010": {
+      "credit_score": 575,
+      "risk_grade": "D",
+      "slik_kol": 2,
+      "total_outstanding_debt_idr": 94033596,
+      "monthly_debt_obligations_idr": 7836133,
+      "active_facilities": [
+        {
+          "type": "KKB",
+          "monthly_payment_idr": 7836133
+        }
+      ],
+      "delinquencies_12m": 1,
+      "enquiries_6m": 0
+    },
+    "CUST-1011": {
+      "credit_score": 0,
+      "risk_grade": "D",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 0,
+      "monthly_debt_obligations_idr": 0,
+      "active_facilities": [],
+      "delinquencies_12m": 0,
+      "enquiries_6m": 0
+    },
+    "CUST-1012": {
+      "credit_score": 603,
+      "risk_grade": "C",
+      "slik_kol": 2,
+      "total_outstanding_debt_idr": 99403272,
+      "monthly_debt_obligations_idr": 5522404,
+      "active_facilities": [
+        {
+          "type": "KKB",
+          "monthly_payment_idr": 5522404
+        }
+      ],
+      "delinquencies_12m": 2,
+      "enquiries_6m": 0
+    },
+    "CUST-1013": {
+      "credit_score": 548,
+      "risk_grade": "D",
+      "slik_kol": 2,
+      "total_outstanding_debt_idr": 273632612,
+      "monthly_debt_obligations_idr": 8048018,
+      "active_facilities": [
+        {
+          "type": "KTA",
+          "monthly_payment_idr": 8048018
+        }
+      ],
+      "delinquencies_12m": 3,
+      "enquiries_6m": 0
+    },
+    "CUST-1014": {
+      "credit_score": 641,
+      "risk_grade": "C",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 90801539,
+      "monthly_debt_obligations_idr": 3947893,
+      "active_facilities": [
+        {
+          "type": "KTA",
+          "monthly_payment_idr": 3947893
+        }
+      ],
+      "delinquencies_12m": 0,
+      "enquiries_6m": 4
+    },
+    "CUST-1015": {
+      "credit_score": 834,
+      "risk_grade": "A",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 28044240,
+      "monthly_debt_obligations_idr": 1869616,
+      "active_facilities": [
+        {
+          "type": "KKB",
+          "monthly_payment_idr": 1869616
+        }
+      ],
+      "delinquencies_12m": 0,
+      "enquiries_6m": 0
+    },
+    "CUST-1016": {
+      "credit_score": 694,
+      "risk_grade": "B",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 42382592,
+      "monthly_debt_obligations_idr": 1324456,
+      "active_facilities": [
+        {
+          "type": "KKB",
+          "monthly_payment_idr": 1324456
+        }
+      ],
+      "delinquencies_12m": 0,
+      "enquiries_6m": 2
+    },
+    "CUST-1017": {
+      "credit_score": 557,
+      "risk_grade": "D",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 29557235,
+      "monthly_debt_obligations_idr": 1019215,
+      "active_facilities": [
+        {
+          "type": "Kartu Kredit",
+          "monthly_payment_idr": 1019215
+        }
+      ],
+      "delinquencies_12m": 3,
+      "enquiries_6m": 2
+    },
+    "CUST-1018": {
+      "credit_score": 627,
+      "risk_grade": "C",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 56896175,
+      "monthly_debt_obligations_idr": 1625605,
+      "active_facilities": [
+        {
+          "type": "Kartu Kredit",
+          "monthly_payment_idr": 1625605
+        }
+      ],
+      "delinquencies_12m": 3,
+      "enquiries_6m": 3
+    },
+    "CUST-1019": {
+      "credit_score": 619,
+      "risk_grade": "C",
+      "slik_kol": 2,
+      "total_outstanding_debt_idr": 54558308,
+      "monthly_debt_obligations_idr": 1948511,
+      "active_facilities": [
+        {
+          "type": "KTA",
+          "monthly_payment_idr": 1948511
+        }
+      ],
+      "delinquencies_12m": 2,
+      "enquiries_6m": 0
+    },
+    "CUST-1020": {
+      "credit_score": 559,
+      "risk_grade": "D",
+      "slik_kol": 2,
+      "total_outstanding_debt_idr": 222268441,
+      "monthly_debt_obligations_idr": 11698339,
+      "active_facilities": [
+        {
+          "type": "KTA",
+          "monthly_payment_idr": 11698339
+        }
+      ],
+      "delinquencies_12m": 2,
+      "enquiries_6m": 0
+    },
+    "CUST-1021": {
+      "credit_score": 675,
+      "risk_grade": "C",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 72836904,
+      "monthly_debt_obligations_idr": 2601318,
+      "active_facilities": [
+        {
+          "type": "KTA",
+          "monthly_payment_idr": 2601318
+        }
+      ],
+      "delinquencies_12m": 0,
+      "enquiries_6m": 4
+    },
+    "CUST-1022": {
+      "credit_score": 718,
+      "risk_grade": "B",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 90006990,
+      "monthly_debt_obligations_idr": 3000233,
+      "active_facilities": [
+        {
+          "type": "KTA",
+          "monthly_payment_idr": 3000233
+        }
+      ],
+      "delinquencies_12m": 0,
+      "enquiries_6m": 1
+    },
+    "CUST-1023": {
+      "credit_score": 543,
+      "risk_grade": "D",
+      "slik_kol": 2,
+      "total_outstanding_debt_idr": 24977064,
+      "monthly_debt_obligations_idr": 892038,
+      "active_facilities": [
+        {
+          "type": "Kartu Kredit",
+          "monthly_payment_idr": 892038
+        }
+      ],
+      "delinquencies_12m": 3,
+      "enquiries_6m": 0
+    },
+    "CUST-1024": {
+      "credit_score": 629,
+      "risk_grade": "C",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 225888260,
+      "monthly_debt_obligations_idr": 8688010,
+      "active_facilities": [
+        {
+          "type": "Kartu Kredit",
+          "monthly_payment_idr": 8688010
+        }
+      ],
+      "delinquencies_12m": 3,
+      "enquiries_6m": 4
+    },
+    "CUST-1025": {
+      "credit_score": 657,
+      "risk_grade": "C",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 33216510,
+      "monthly_debt_obligations_idr": 1107217,
+      "active_facilities": [
+        {
+          "type": "KKB",
+          "monthly_payment_idr": 1107217
+        }
+      ],
+      "delinquencies_12m": 0,
+      "enquiries_6m": 4
+    },
+    "CUST-1026": {
+      "credit_score": 748,
+      "risk_grade": "B",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 169086425,
+      "monthly_debt_obligations_idr": 6763457,
+      "active_facilities": [
+        {
+          "type": "Kartu Kredit",
+          "monthly_payment_idr": 6763457
+        }
+      ],
+      "delinquencies_12m": 0,
+      "enquiries_6m": 2
+    },
+    "CUST-1027": {
+      "credit_score": 627,
+      "risk_grade": "C",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 72584232,
+      "monthly_debt_obligations_idr": 1961736,
+      "active_facilities": [
+        {
+          "type": "KKB",
+          "monthly_payment_idr": 1961736
+        }
+      ],
+      "delinquencies_12m": 3,
+      "enquiries_6m": 2
+    },
+    "CUST-1028": {
+      "credit_score": 847,
+      "risk_grade": "A",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 76808146,
+      "monthly_debt_obligations_idr": 4042534,
+      "active_facilities": [
+        {
+          "type": "Kartu Kredit",
+          "monthly_payment_idr": 4042534
+        }
+      ],
+      "delinquencies_12m": 0,
+      "enquiries_6m": 0
+    },
+    "CUST-1029": {
+      "credit_score": 826,
+      "risk_grade": "A",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 182425800,
+      "monthly_debt_obligations_idr": 9121290,
+      "active_facilities": [
+        {
+          "type": "KKB",
+          "monthly_payment_idr": 9121290
+        }
+      ],
+      "delinquencies_12m": 0,
+      "enquiries_6m": 4
+    },
+    "CUST-1030": {
+      "credit_score": 590,
+      "risk_grade": "C",
+      "slik_kol": 2,
+      "total_outstanding_debt_idr": 129220840,
+      "monthly_debt_obligations_idr": 6461042,
+      "active_facilities": [
+        {
+          "type": "KTA",
+          "monthly_payment_idr": 6461042
+        }
+      ],
+      "delinquencies_12m": 2,
+      "enquiries_6m": 0
+    },
+    "CUST-1031": {
+      "credit_score": 525,
+      "risk_grade": "D",
+      "slik_kol": 2,
+      "total_outstanding_debt_idr": 45176616,
+      "monthly_debt_obligations_idr": 1882359,
+      "active_facilities": [
+        {
+          "type": "Kartu Kredit",
+          "monthly_payment_idr": 1882359
+        }
+      ],
+      "delinquencies_12m": 3,
+      "enquiries_6m": 0
+    },
+    "CUST-1032": {
+      "credit_score": 816,
+      "risk_grade": "A",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 16867994,
+      "monthly_debt_obligations_idr": 1297538,
+      "active_facilities": [
+        {
+          "type": "Kartu Kredit",
+          "monthly_payment_idr": 1297538
+        }
+      ],
+      "delinquencies_12m": 0,
+      "enquiries_6m": 0
+    },
+    "CUST-1033": {
+      "credit_score": 608,
+      "risk_grade": "C",
+      "slik_kol": 2,
+      "total_outstanding_debt_idr": 38196210,
+      "monthly_debt_obligations_idr": 1273207,
+      "active_facilities": [
+        {
+          "type": "KTA",
+          "monthly_payment_idr": 1273207
+        }
+      ],
+      "delinquencies_12m": 3,
+      "enquiries_6m": 2
+    },
+    "CUST-1034": {
+      "credit_score": 661,
+      "risk_grade": "C",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 146379765,
+      "monthly_debt_obligations_idr": 9758651,
+      "active_facilities": [
+        {
+          "type": "Kartu Kredit",
+          "monthly_payment_idr": 9758651
+        }
+      ],
+      "delinquencies_12m": 0,
+      "enquiries_6m": 0
+    },
+    "CUST-1035": {
+      "credit_score": 584,
+      "risk_grade": "C",
+      "slik_kol": 2,
+      "total_outstanding_debt_idr": 101018736,
+      "monthly_debt_obligations_idr": 2590224,
+      "active_facilities": [
+        {
+          "type": "KKB",
+          "monthly_payment_idr": 2590224
+        }
+      ],
+      "delinquencies_12m": 1,
+      "enquiries_6m": 2
+    },
+    "CUST-1036": {
+      "credit_score": 850,
+      "risk_grade": "A",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 25206465,
+      "monthly_debt_obligations_idr": 1680431,
+      "active_facilities": [
+        {
+          "type": "KKB",
+          "monthly_payment_idr": 1680431
+        }
+      ],
+      "delinquencies_12m": 0,
+      "enquiries_6m": 4
+    },
+    "CUST-1037": {
+      "credit_score": 647,
+      "risk_grade": "C",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 57169366,
+      "monthly_debt_obligations_idr": 1545118,
+      "active_facilities": [
+        {
+          "type": "Kartu Kredit",
+          "monthly_payment_idr": 1545118
+        }
+      ],
+      "delinquencies_12m": 0,
+      "enquiries_6m": 0
+    },
+    "CUST-1038": {
+      "credit_score": 825,
+      "risk_grade": "A",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 274905792,
+      "monthly_debt_obligations_idr": 9818064,
+      "active_facilities": [
+        {
+          "type": "KKB",
+          "monthly_payment_idr": 9818064
+        }
+      ],
+      "delinquencies_12m": 0,
+      "enquiries_6m": 2
+    },
+    "CUST-1039": {
+      "credit_score": 580,
+      "risk_grade": "C",
+      "slik_kol": 2,
+      "total_outstanding_debt_idr": 197638140,
+      "monthly_debt_obligations_idr": 9881907,
+      "active_facilities": [
+        {
+          "type": "KKB",
+          "monthly_payment_idr": 9881907
+        }
+      ],
+      "delinquencies_12m": 3,
+      "enquiries_6m": 1
+    },
+    "CUST-1040": {
+      "credit_score": 610,
+      "risk_grade": "C",
+      "slik_kol": 2,
+      "total_outstanding_debt_idr": 104738621,
+      "monthly_debt_obligations_idr": 5512559,
+      "active_facilities": [
+        {
+          "type": "Kartu Kredit",
+          "monthly_payment_idr": 5512559
+        }
+      ],
+      "delinquencies_12m": 3,
+      "enquiries_6m": 4
+    }
+  },
+  "companies": {
+    "SME-5001": {
+      "credit_score": 589,
+      "risk_grade": "C",
+      "slik_kol": 2,
+      "total_outstanding_debt_idr": 30017403683,
+      "delinquencies_12m": 1
+    },
+    "SME-5002": {
+      "credit_score": 641,
+      "risk_grade": "C",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 1133175291,
+      "delinquencies_12m": 1
+    },
+    "SME-5003": {
+      "credit_score": 587,
+      "risk_grade": "C",
+      "slik_kol": 2,
+      "total_outstanding_debt_idr": 8107501401,
+      "delinquencies_12m": 1
+    },
+    "SME-5004": {
+      "credit_score": 569,
+      "risk_grade": "C",
+      "slik_kol": 2,
+      "total_outstanding_debt_idr": 5740144311,
+      "delinquencies_12m": 1
+    },
+    "SME-5005": {
+      "credit_score": 760,
+      "risk_grade": "B",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 6411366288,
+      "delinquencies_12m": 0
+    },
+    "SME-5006": {
+      "credit_score": 737,
+      "risk_grade": "B",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 8554205864,
+      "delinquencies_12m": 0
+    },
+    "SME-5007": {
+      "credit_score": 715,
+      "risk_grade": "B",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 7624378826,
+      "delinquencies_12m": 0
+    },
+    "SME-5008": {
+      "credit_score": 691,
+      "risk_grade": "B",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 8782375361,
+      "delinquencies_12m": 0
+    },
+    "SME-5009": {
+      "credit_score": 571,
+      "risk_grade": "C",
+      "slik_kol": 2,
+      "total_outstanding_debt_idr": 14849429460,
+      "delinquencies_12m": 1
+    },
+    "SME-5010": {
+      "credit_score": 783,
+      "risk_grade": "A",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 16751940919,
+      "delinquencies_12m": 0
+    },
+    "SME-5011": {
+      "credit_score": 700,
+      "risk_grade": "B",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 3408771509,
+      "delinquencies_12m": 0
+    },
+    "SME-5012": {
+      "credit_score": 724,
+      "risk_grade": "B",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 8262459411,
+      "delinquencies_12m": 0
+    },
+    "SME-5013": {
+      "credit_score": 653,
+      "risk_grade": "C",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 7535692575,
+      "delinquencies_12m": 2
+    },
+    "SME-5014": {
+      "credit_score": 696,
+      "risk_grade": "B",
+      "slik_kol": 1,
+      "total_outstanding_debt_idr": 3384547238,
+      "delinquencies_12m": 0
+    },
+    "SME-5015": {
+      "credit_score": 562,
+      "risk_grade": "C",
+      "slik_kol": 2,
+      "total_outstanding_debt_idr": 12024349585,
+      "delinquencies_12m": 2
+    }
+  }
+}

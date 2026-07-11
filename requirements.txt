@@ -1,0 +1,27 @@
+# ---- Microsoft Agent Framework (agents + workflows) ----
+agent-framework
+
+# ---- Azure / Foundry ----
+azure-identity
+azure-ai-projects
+azure-ai-contentsafety
+azure-monitor-opentelemetry
+
+# ---- OpenTelemetry (local Aspire dashboard export) ----
+opentelemetry-exporter-otlp-proto-grpc
+
+# ---- Mock surrounding systems ----
+fastapi
+uvicorn[standard]
+httpx
+mcp
+
+# ---- Web portal ----
+streamlit
+pandas
+
+# ---- Core ----
+pydantic
+pydantic-settings
+python-dotenv
+faker

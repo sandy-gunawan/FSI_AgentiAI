@@ -1,0 +1,17 @@
+# Surrounding systems: REST back-office + MCP servers (Streamable HTTP).
+# Exposes data/API/MCP over HTTPS so any system can call them.
+FROM python:3.13-slim
+
+WORKDIR /srv
+ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
+
+COPY mock_services/requirements.txt ./requirements.txt
+RUN pip install -r requirements.txt
+
+COPY mock_services ./mock_services
+
+# Ensure datasets exist (deterministic seed).
+RUN python mock_services/data/seed.py
+
+EXPOSE 8080
+CMD ["uvicorn", "mock_services.server:app", "--host", "0.0.0.0", "--port", "8080"]
