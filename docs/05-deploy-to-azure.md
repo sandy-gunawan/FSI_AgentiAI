@@ -10,16 +10,16 @@
 
 This repo deploys as **three container apps**:
 
-1. `ca-bns-portal` (Streamlit UI + agent orchestration)
-2. `ca-bns-systems` (surrounding systems: REST + MCP)
-3. `ca-bns-partner` (external partner bank agent via A2A)
+1. `<your-portal-app-name>` (Streamlit UI + agent orchestration)
+2. `<your-systems-app-name>` (surrounding systems: REST + MCP)
+3. `<your-partner-app-name>` (external partner bank agent via A2A)
 
 All three are in:
 
-- Resource group: `rg-finance-agenticai`
-- Region: `eastus2`
-- Container Apps environment: `cae-finance-agenticai`
-- Container registry: `acrbnsfin6zpbi`
+- Resource group: `<your-resource-group>`
+- Region: `<your-region>`
+- Container Apps environment: `<your-containerapps-env>`
+- Container registry: `<your-acr-name>`
 
 ---
 
@@ -42,7 +42,7 @@ If not logged in:
 
 ```powershell
 az login
-az account set --subscription 5a7c13bd-9a15-4380-ba67-4d972838bc0b
+az account set --subscription <your-subscription-id>
 ```
 
 ---
@@ -52,22 +52,22 @@ az account set --subscription 5a7c13bd-9a15-4380-ba67-4d972838bc0b
 Run these in PowerShell from repo root:
 
 ```powershell
-$SUB = "5a7c13bd-9a15-4380-ba67-4d972838bc0b"
-$RG = "rg-finance-agenticai"
-$LOC = "eastus2"
-$ACR = "acrbnsfin6zpbi"
-$ENV = "cae-finance-agenticai"
+$SUB = "<your-subscription-id>"
+$RG = "<your-resource-group>"
+$LOC = "<your-region>"                 # example: eastus2
+$ACR = "<your-acr-name>"
+$ENV = "<your-containerapps-env>"
 
-$PORTAL_APP = "ca-bns-portal"
-$SYSTEMS_APP = "ca-bns-systems"
-$PARTNER_APP = "ca-bns-partner"
+$PORTAL_APP = "<your-portal-app-name>"
+$SYSTEMS_APP = "<your-systems-app-name>"
+$PARTNER_APP = "<your-partner-app-name>"
 
 $PORTAL_IMAGE = "bns-portal:v16"
 $SYSTEMS_IMAGE = "bns-systems:v5"
 $PARTNER_IMAGE = "bns-partner:v3"
 
-$SYSTEMS_URL = "https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io"
-$PARTNER_URL = "https://ca-bns-partner.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io"
+$SYSTEMS_URL = "https://<your-systems-app-fqdn>"
+$PARTNER_URL = "https://<your-partner-app-fqdn>"
 ```
 
 You can change the image tags (`v16`, `v5`, `v3`) if you want newer versions.
@@ -84,7 +84,7 @@ az acr build -r $ACR -t $SYSTEMS_IMAGE -f Dockerfile.systems .
 az acr build -r $ACR -t $PARTNER_IMAGE -f Dockerfile.partner .
 ```
 
-Expected result: each command ends with success and image pushed into `acrbnsfin6zpbi.azurecr.io`.
+Expected result: each command ends with success and image pushed into `<your-acr-name>.azurecr.io`.
 
 ---
 
@@ -136,17 +136,17 @@ You want `running = Running` and image tags matching what you just pushed.
 
 ### 5.2 Verify public URLs
 
-- Portal: `https://ca-bns-portal.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io`
-- Systems root: `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io`
-- Systems health: `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/health`
-- Partner health: `https://ca-bns-partner.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/health`
+- Portal: `https://<your-portal-app-fqdn>`
+- Systems root: `https://<your-systems-app-fqdn>`
+- Systems health: `https://<your-systems-app-fqdn>/health`
+- Partner health: `https://<your-partner-app-fqdn>/health`
 
 Smoke test commands:
 
 ```powershell
-curl "https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/health"
-curl "https://ca-bns-partner.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/health"
-curl "https://ca-bns-partner.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/.well-known/agent-card.json"
+curl "https://<your-systems-app-fqdn>/health"
+curl "https://<your-partner-app-fqdn>/health"
+curl "https://<your-partner-app-fqdn>/.well-known/agent-card.json"
 ```
 
 ---
@@ -157,7 +157,7 @@ curl "https://ca-bns-partner.delightfulisland-5bc416ad.eastus2.azurecontainerapp
 
 Base:
 
-- `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io`
+- `https://<your-systems-app-fqdn>`
 
 Examples:
 
@@ -172,14 +172,14 @@ Examples:
 
 ### 6.2 MCP endpoints (Streamable HTTP)
 
-- `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/mcp/credit-bureau/`
-- `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/mcp/kyc-aml/`
-- `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/mcp/policy-rules/`
+- `https://<your-systems-app-fqdn>/mcp/credit-bureau/`
+- `https://<your-systems-app-fqdn>/mcp/kyc-aml/`
+- `https://<your-systems-app-fqdn>/mcp/policy-rules/`
 
 ### 6.3 A2A partner endpoints
 
-- Agent Card: `https://ca-bns-partner.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/.well-known/agent-card.json`
-- JSON-RPC: `https://ca-bns-partner.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/a2a`
+- Agent Card: `https://<your-partner-app-fqdn>/.well-known/agent-card.json`
+- JSON-RPC: `https://<your-partner-app-fqdn>/a2a`
 
 ---
 
@@ -228,8 +228,8 @@ For production, add at least:
   - Partner: `http://localhost:8090`
 
 - Azure:
-  - Portal: `https://ca-bns-portal.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io`
-  - Systems: `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io`
-  - Partner: `https://ca-bns-partner.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io`
+  - Portal: `https://<your-portal-app-fqdn>`
+  - Systems: `https://<your-systems-app-fqdn>`
+  - Partner: `https://<your-partner-app-fqdn>`
 
 If local works but Azure fails, compare this mapping first.

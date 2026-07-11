@@ -134,7 +134,7 @@ the call and **how much the model is trusted to drive it**.
 | Environment | Portal (UI) | Surrounding systems (REST + MCP) | Partner bank (A2A) |
 |-------------|-------------|----------------------------------|--------------------|
 | **Local** | `http://localhost:8501` (default Streamlit) | `http://localhost:8080` | `http://localhost:8090` |
-| **Cloud (Azure Container Apps)** | `https://ca-bns-portal.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io` | `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io` | `https://ca-bns-partner.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io` |
+| **Cloud (Azure Container Apps)** | `https://<your-portal-app-fqdn>` | `https://<your-systems-app-fqdn>` | `https://<your-partner-app-fqdn>` |
 
 The app finds these via two environment variables (see [app/core/config.py](../app/core/config.py)):
 
@@ -165,36 +165,36 @@ between agents that share nothing.
 
 ```bash
 # 1) Is the surrounding-systems app alive?
-curl https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/health
+curl https://<your-systems-app-fqdn>/health
 # → {"status":"ok","service":"bns-mock-rest"}
 
 # 2) What does the front door list?
-curl https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/
+curl https://<your-systems-app-fqdn>/
 # → {"service":"...","rest":[...],"mcp":{...}}
 
 # 3) Is the partner (A2A) bank alive?
-curl https://ca-bns-partner.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/health
+curl https://<your-partner-app-fqdn>/health
 # → {"status":"ok","service":"bms-partner-a2a","provider":"Bank Mitra Sejahtera (BMS)"}
 
 # 4) Open the UI portal
-curl -I https://ca-bns-portal.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io
+curl -I https://<your-portal-app-fqdn>
 ```
 
 ### 3.4 Live access links (quick reference)
 
-- Portal (UI): `https://ca-bns-portal.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io`
-- Surrounding systems root: `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io`
-- Systems health: `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/health`
+- Portal (UI): `https://<your-portal-app-fqdn>`
+- Surrounding systems root: `https://<your-systems-app-fqdn>`
+- Systems health: `https://<your-systems-app-fqdn>/health`
 - Surrounding REST samples:
-  - `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/core-banking/customers/CUST-1001/accounts`
-  - `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/pricing/products`
+  - `https://<your-systems-app-fqdn>/core-banking/customers/CUST-1001/accounts`
+  - `https://<your-systems-app-fqdn>/pricing/products`
 - Surrounding MCP endpoints:
-  - `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/mcp/credit-bureau/`
-  - `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/mcp/kyc-aml/`
-  - `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/mcp/policy-rules/`
+  - `https://<your-systems-app-fqdn>/mcp/credit-bureau/`
+  - `https://<your-systems-app-fqdn>/mcp/kyc-aml/`
+  - `https://<your-systems-app-fqdn>/mcp/policy-rules/`
 - Partner A2A:
-  - Agent Card: `https://ca-bns-partner.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/.well-known/agent-card.json`
-  - JSON-RPC endpoint: `https://ca-bns-partner.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/a2a`
+  - Agent Card: `https://<your-partner-app-fqdn>/.well-known/agent-card.json`
+  - JSON-RPC endpoint: `https://<your-partner-app-fqdn>/a2a`
 
 ---
 
@@ -235,7 +235,7 @@ Six logical systems share one FastAPI app:
 ### 4.2 Copy-paste examples
 
 ```bash
-BASE=https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io
+BASE=https://<your-systems-app-fqdn>
 
 # Accounts + 6-month cashflow
 curl "$BASE/core-banking/customers/CUST-1001/accounts"
@@ -342,7 +342,7 @@ Any A2A caller first fetches the card at the **well-known path**. It's the partn
 who it is, what it can do, where to send work, and in what format.
 
 ```bash
-curl https://ca-bns-partner.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/.well-known/agent-card.json
+curl https://<your-partner-app-fqdn>/.well-known/agent-card.json
 ```
 
 ```json
@@ -377,7 +377,7 @@ You then `POST` a JSON-RPC 2.0 envelope to the card's `url`. The task payload (t
 carried as **text inside a message part** — here we put a small JSON string in that text part.
 
 ```bash
-RPC=https://ca-bns-partner.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/a2a
+RPC=https://<your-partner-app-fqdn>/a2a
 
 curl -X POST "$RPC" -H "Content-Type: application/json" -d '{
   "jsonrpc": "2.0",
@@ -535,7 +535,7 @@ python mock_services/data/seed.py   # deterministic; safe to re-run
 
 ```python
 import httpx
-BASE = "https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io"
+BASE = "https://<your-systems-app-fqdn>"
 r = httpx.get(f"{BASE}/core-banking/customers/CUST-1001/accounts", timeout=15)
 print(r.json())
 ```
@@ -543,7 +543,7 @@ print(r.json())
 ### 8.2 REST — from Node.js
 
 ```js
-const BASE = "https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io";
+const BASE = "https://<your-systems-app-fqdn>";
 const res = await fetch(`${BASE}/collateral/COL-9001`);
 console.log(await res.json());
 ```
@@ -552,7 +552,7 @@ console.log(await res.json());
 
 ```python
 import httpx, json
-PARTNER = "https://ca-bns-partner.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io"
+PARTNER = "https://<your-partner-app-fqdn>"
 
 card = httpx.get(f"{PARTNER}/.well-known/agent-card.json", timeout=20).json()
 deal = {"sector": "manufacturing", "requested_participation_idr": 8_000_000_000,

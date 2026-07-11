@@ -123,21 +123,21 @@ analyst confirms filing (case paused & persisted, like Use Case 2).
 
 ---
 
-## Live Azure resources (resource group `rg-finance-agenticai`, `eastus2`)
+## Live Azure resources (redacted template)
 
 | Resource | Name | Notes |
 |---|---|---|
-| Foundry (AI Services) | `bnsfoundryer3wj7` | project `financing`, model `gpt-4o-mini` (GlobalStandard) |
-| Container Apps env | `cae-finance-agenticai` | |
-| **Surrounding systems** | `ca-bns-systems` | public — REST + MCP |
-| **Portal** | `ca-bns-portal` | public — Streamlit, managed identity |
-| Container Registry | `acrbnsfin6zpbi` | Basic |
-| App Insights | `appi-finance-agenticai` | workspace-based |
-| Log Analytics | `log-finance-agenticai` | |
+| Foundry (AI Services) | `<your-foundry-resource>` | project `<your-project>`, model `gpt-4o-mini` (GlobalStandard) |
+| Container Apps env | `<your-containerapps-env>` | |
+| **Surrounding systems** | `<your-systems-app>` | public — REST + MCP |
+| **Portal** | `<your-portal-app>` | public — Streamlit, managed identity |
+| Container Registry | `<your-acr-name>` | Basic |
+| App Insights | `<your-appinsights-name>` | workspace-based |
+| Log Analytics | `<your-loganalytics-name>` | |
 
 **Public endpoints**
-- Portal: `https://ca-bns-portal.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io`
-- Systems (callable from any system): `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io`
+- Portal: `https://<your-portal-app-fqdn>`
+- Systems (callable from any system): `https://<your-systems-app-fqdn>`
   - REST: `/core-banking/...`, `/collateral/...`, `/financials/...`, `/pricing/...`, `/servicing/...`, `/monitoring/...`, `/health`
   - MCP (Streamable HTTP): `/mcp/credit-bureau/`, `/mcp/kyc-aml/`, `/mcp/policy-rules/`
 
