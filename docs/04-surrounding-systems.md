@@ -131,10 +131,10 @@ the call and **how much the model is trusted to drive it**.
 
 ### 3.1 Base URLs
 
-| Environment | Surrounding systems (REST + MCP) | Partner bank (A2A) |
-|-------------|----------------------------------|--------------------|
-| **Local** | `http://localhost:8080` | `http://localhost:8090` |
-| **Cloud (Azure Container Apps)** | `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io` | `https://ca-bns-partner.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io` |
+| Environment | Portal (UI) | Surrounding systems (REST + MCP) | Partner bank (A2A) |
+|-------------|-------------|----------------------------------|--------------------|
+| **Local** | `http://localhost:8501` (default Streamlit) | `http://localhost:8080` | `http://localhost:8090` |
+| **Cloud (Azure Container Apps)** | `https://ca-bns-portal.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io` | `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io` | `https://ca-bns-partner.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io` |
 
 The app finds these via two environment variables (see [app/core/config.py](../app/core/config.py)):
 
@@ -175,7 +175,26 @@ curl https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps
 # 3) Is the partner (A2A) bank alive?
 curl https://ca-bns-partner.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/health
 # → {"status":"ok","service":"bms-partner-a2a","provider":"Bank Mitra Sejahtera (BMS)"}
+
+# 4) Open the UI portal
+curl -I https://ca-bns-portal.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io
 ```
+
+### 3.4 Live access links (quick reference)
+
+- Portal (UI): `https://ca-bns-portal.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io`
+- Surrounding systems root: `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io`
+- Systems health: `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/health`
+- Surrounding REST samples:
+  - `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/core-banking/customers/CUST-1001/accounts`
+  - `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/pricing/products`
+- Surrounding MCP endpoints:
+  - `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/mcp/credit-bureau/`
+  - `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/mcp/kyc-aml/`
+  - `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/mcp/policy-rules/`
+- Partner A2A:
+  - Agent Card: `https://ca-bns-partner.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/.well-known/agent-card.json`
+  - JSON-RPC endpoint: `https://ca-bns-partner.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/a2a`
 
 ---
 

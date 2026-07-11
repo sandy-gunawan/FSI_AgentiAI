@@ -12,6 +12,10 @@ on Azure**, so they are callable over HTTPS from any system — not just this ap
 > 🧑‍💻 **New to the code?** Start with **[docs/](docs/README.md)** — it explains *what an "agent"
 > actually is in this codebase* (there's no class-per-agent), how the Microsoft Agent Framework is
 > called, the end-to-end request trace, and a diagrammed walkthrough of every use case.
+>
+> ☁️ **Need Azure deployment steps?** Follow **[docs/05-deploy-to-azure.md](docs/05-deploy-to-azure.md)**
+> for beginner-friendly, copy-paste commands (build images, update Container Apps, set env vars,
+> verify portal/systems/partner URLs).
 
 ---
 

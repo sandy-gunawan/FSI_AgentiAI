@@ -12,6 +12,7 @@ Read in this order:
 | 2 | [02-architecture-and-flow.md](02-architecture-and-flow.md) | Layers, component map, the end-to-end **request trace**, and how the framework is called. |
 | 3 | [03-use-cases.md](03-use-cases.md) | For **each of the 8 use cases**: entry point, components, agents, orchestration, diagram, decisions. |
 | 4 | [04-surrounding-systems.md](04-surrounding-systems.md) | The **REST / MCP / A2A** systems around the agents: what they are, why one container, what data, and **exactly how to call them** (URLs, auth, examples). |
+| 5 | [05-deploy-to-azure.md](05-deploy-to-azure.md) | Newbie step-by-step Azure deployment: build images, update Container Apps, set env vars, verify live URLs. |
 
 > Diagrams use **Mermaid**, which renders in VS Code's Markdown preview and on GitHub.
 
