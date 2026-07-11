@@ -135,9 +135,11 @@ analyst confirms filing (case paused & persisted, like Use Case 2).
 | App Insights | `<your-appinsights-name>` | workspace-based |
 | Log Analytics | `<your-loganalytics-name>` | |
 
-**Public endpoints**
-- Portal: `https://<your-portal-app-fqdn>`
-- Systems (callable from any system): `https://<your-systems-app-fqdn>`
+**Public endpoints (current deployment)**
+- Portal: `https://ca-bns-portal.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io`
+- Systems (callable from any system): `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io`
+  - Health: `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/health`
+  - Root index: `https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io/`
   - REST: `/core-banking/...`, `/collateral/...`, `/financials/...`, `/pricing/...`, `/servicing/...`, `/monitoring/...`, `/health`
   - MCP (Streamable HTTP): `/mcp/credit-bureau/`, `/mcp/kyc-aml/`, `/mcp/policy-rules/`
 
