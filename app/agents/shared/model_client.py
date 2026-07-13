@@ -55,6 +55,25 @@ def _make_tool_logger(sink: list[dict]):
     return _mw
 
 
+def _extract_usage_tokens(usage: Any) -> tuple[int, int]:
+    """Extract (input_tokens, output_tokens) from usage payload.
+
+    Supports both dict-like and object-like usage payloads and common field names
+    returned by different SDK response shapes.
+    """
+    if not usage:
+        return 0, 0
+
+    if isinstance(usage, dict):
+        inp = usage.get("input_token_count") or usage.get("prompt_tokens") or 0
+        out = usage.get("output_token_count") or usage.get("completion_tokens") or 0
+        return int(inp), int(out)
+
+    inp = getattr(usage, "input_token_count", None) or getattr(usage, "prompt_tokens", None) or 0
+    out = getattr(usage, "output_token_count", None) or getattr(usage, "completion_tokens", None) or 0
+    return int(inp), int(out)
+
+
 class AgentRunner:
     """Runs Agent Framework agents with governance hooks attached."""
 
@@ -89,8 +108,7 @@ class AgentRunner:
         result = await agent.run(prompt, options=options)
 
         usage = getattr(result, "usage_details", None) or {}
-        in_tok = int(usage.get("input_token_count", 0)) if usage else 0
-        out_tok = int(usage.get("output_token_count", 0)) if usage else 0
+        in_tok, out_tok = _extract_usage_tokens(usage)
         self.cost.add(in_tok, out_tok)
 
         detail = redact_pii((result.text or "")[:600])

@@ -104,6 +104,52 @@ Tracker summary fields include:
 - budget_used_pct
 - estimated_cost_usd
 
+### EN: Example result payload and extraction
+
+Yes, token usage is read from the result returned by agent run.
+
+Example flow:
+
+```python
+result = await agent.run(prompt, options=options)
+usage = getattr(result, "usage_details", None) or {}
+
+in_tok = int(usage.get("input_token_count") or usage.get("prompt_tokens") or 0)
+out_tok = int(usage.get("output_token_count") or usage.get("completion_tokens") or 0)
+```
+
+Example usage_details shape (representative):
+
+```json
+{
+	"input_token_count": 1287,
+	"output_token_count": 412,
+	"total_token_count": 1699
+}
+```
+
+Runtime implementation anchor:
+
+- result capture: [app/agents/shared/model_client.py#L111](../app/agents/shared/model_client.py#L111)
+- usage extraction helper: [app/agents/shared/model_client.py#L58](../app/agents/shared/model_client.py#L58)
+- token add into budget tracker: [app/agents/shared/model_client.py#L115](../app/agents/shared/model_client.py#L115)
+
+### ID: Contoh result dan cara ambil token
+
+Benar, token diambil dari object result hasil agent.run.
+
+Contohnya:
+
+```python
+result = await agent.run(prompt, options=options)
+usage = getattr(result, "usage_details", None) or {}
+
+in_tok = int(usage.get("input_token_count") or usage.get("prompt_tokens") or 0)
+out_tok = int(usage.get("output_token_count") or usage.get("completion_tokens") or 0)
+```
+
+Jadi angka token mengikuti usage yang dikembalikan runtime model/Foundry melalui result.
+
 ### ID
 
 Token dihitung per step agen dari usage yang dikembalikan runtime model, lalu diakumulasi per request. Jika lewat budget, request dihentikan dengan error budget.
@@ -148,6 +194,12 @@ Accuracy caveats:
 2. Estimated cost can diverge from actual bill if model pricing, region, or meter differs
 3. Technical log storage is in-memory per process for tool entries in [app/governance/tech_log.py](../app/governance/tech_log.py)
 Anchor: [app/governance/tech_log.py#L10](../app/governance/tech_log.py#L10)
+
+Foundry accuracy note:
+
+- The app tracks the usage reported in result.usage_details.
+- If Foundry returns input/output token fields, this app records those same values.
+- Accuracy differences usually come from aggregation scope (per-step vs per-request vs billing window), not from formula mismatch.
 
 ### ID
 
