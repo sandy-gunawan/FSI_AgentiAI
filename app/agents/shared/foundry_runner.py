@@ -18,7 +18,9 @@ from typing import Any
 
 from azure.ai.projects import AIProjectClient
 from azure.identity import DefaultAzureCredential
+from openai import OpenAI
 
+from app.agents.shared.gateway import apim_base_url, apim_headers, route_label, use_apim
 from app.core.config import get_settings
 from app.governance.audit_log import get_audit_logger
 from app.governance.content_safety import redact_pii
@@ -82,9 +84,12 @@ class FoundryAgentRunner:
     """Runs Foundry-hosted prompt agents with the SAME governance hooks as v1."""
 
     def __init__(self, project: AIProjectClient, request_id: str, use_case: str,
-                 cost: CostTracker, registry: dict) -> None:
+                 cost: CostTracker, registry: dict, openai_client=None,
+                 route: str = "direct") -> None:
         self.project = project
-        self.openai = project.get_openai_client()
+        # Injected client (APIM) or the direct Foundry OpenAI client.
+        self.openai = openai_client or project.get_openai_client()
+        self.route = route
         self.request_id = request_id
         self.use_case = use_case
         self.cost = cost
@@ -112,7 +117,7 @@ class FoundryAgentRunner:
         # Record the real Foundry usage payload into the technical log (like v1's model:usage).
         self.tech.append({
             "tool": "foundry:agent",
-            "args": _trim({"agent": agent_name, "step": step}),
+            "args": _trim({"agent": agent_name, "step": step, "route": self.route}),
             "result": _trim(_usage_snapshot(usage)),
             "ms": 0.0,
         })
@@ -128,15 +133,34 @@ class FoundryAgentRunner:
 
 
 @contextmanager
-def foundry_session(request_id: str, use_case: str):
-    """Own the AIProjectClient + cost tracker for one Foundry-backed request."""
+def foundry_session(request_id: str, use_case: str, via_apim: bool | None = None):
+    """Own the AIProjectClient + cost tracker for one Foundry-backed request.
+
+    ``via_apim`` is the per-request routing override from the portal toggle. When APIM
+    is requested *and configured*, the agent calls go through the gateway; otherwise
+    they go directly to Foundry (see app/agents/shared/gateway.py).
+    """
     registry = load_agent_registry()
     endpoint = registry.get("project_endpoint") or get_settings().foundry_project_endpoint
     cost = CostTracker(request_id)
     credential = DefaultAzureCredential()
     project = AIProjectClient(endpoint=endpoint, credential=credential)
+
+    route = route_label(via_apim)
+    openai_client = None
+    if use_apim(via_apim):
+        s = get_settings()
+        openai_client = OpenAI(
+            base_url=apim_base_url("responses"),
+            api_key=s.apim_subscription_key,       # APIM validates via subscription key header
+            default_headers=apim_headers(),
+        )
+    # Governance: record the effective route so the audit trail shows direct vs APIM.
+    get_audit_logger().record(request_id, use_case, "gateway", f"route:{route}",
+                              f"Routing agen v2 via {route.upper()}", decision=route.upper())
     try:
-        yield FoundryAgentRunner(project, request_id, use_case, cost, registry), cost
+        yield FoundryAgentRunner(project, request_id, use_case, cost, registry,
+                                 openai_client=openai_client, route=route), cost
     finally:
         for closeable in (project, credential):
             try:

@@ -16,7 +16,7 @@ from app.core.models import AmlInvestigationRequest
 from app.governance.audit_log import get_audit_logger
 from app.observability.otel_setup import setup_observability
 from app.portal.agent_viz import FlowState, render_aml_html
-from app.portal.portal_utils import render_audit_legend, render_tech_log, run_async
+from app.portal.portal_utils import render_audit_legend, render_gateway_toggle, render_tech_log, run_async
 from app.workflows import data_access as sor
 from app.workflows.aml_foundry_workflow import run_aml_foundry
 
@@ -94,6 +94,7 @@ logc.markdown("#### 📜 Log Agentic (real-time)")
 log_ph = logc.empty()
 _log_render(log_ph, [])
 
+via_apim = render_gateway_toggle("aml")
 results = st.container()
 
 if submitted:
@@ -115,7 +116,7 @@ if submitted:
             _log_render(log_ph, lines)
 
     try:
-        result, cost = run_async(run_aml_foundry(req, request_id, on_event=_on_event))
+        result, cost = run_async(run_aml_foundry(req, request_id, on_event=_on_event, via_apim=via_apim))
     except Exception as exc:
         st.error(f"Gagal menjalankan agen Foundry: {exc}")
         st.stop()

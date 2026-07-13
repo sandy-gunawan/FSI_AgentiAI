@@ -29,7 +29,8 @@ def _rp(x) -> str:
 
 
 async def run_syndication_foundry(
-    request: SyndicationRequest, request_id: str, on_event=None
+    request: SyndicationRequest, request_id: str, on_event=None,
+    via_apim: bool | None = None,
 ) -> tuple[dict, dict, dict]:
     """Arrange a syndication via A2A delegation, using Foundry agents. Returns (result, cost, a2a_meta)."""
     settings = get_settings()
@@ -66,7 +67,7 @@ async def run_syndication_foundry(
     offer: dict | None = None
     a2a_meta: dict = {}
 
-    with foundry_session(request_id, "syndication") as (runner, cost):
+    with foundry_session(request_id, "syndication", via_apim) as (runner, cost):
         def _call(step, name, agent_key, prompt):
             return asyncio.to_thread(runner.run, step=step, name=name, agent_key=agent_key, prompt=prompt)
 

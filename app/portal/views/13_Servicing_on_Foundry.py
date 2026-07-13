@@ -15,7 +15,7 @@ from app.core.models import ServiceRequest
 from app.governance.audit_log import get_audit_logger
 from app.observability.otel_setup import setup_observability
 from app.portal.agent_viz import FlowState, render_servicing_html
-from app.portal.portal_utils import render_audit_legend, render_tech_log, run_async
+from app.portal.portal_utils import render_audit_legend, render_gateway_toggle, render_tech_log, run_async
 from app.workflows import data_access as sor
 from app.workflows.servicing_foundry_workflow import run_servicing_foundry
 
@@ -73,6 +73,7 @@ log_ph = logc.empty()
 with log_ph.container(height=VIZ_H):
     st.caption("Log langkah agen (Foundry) akan tampil di sini…")
 
+via_apim = render_gateway_toggle("servicing")
 results = st.container()
 
 if submitted:
@@ -96,7 +97,7 @@ if submitted:
                     st.markdown(ln)
 
     try:
-        result, cost = run_async(run_servicing_foundry(request, request_id, on_event=_on_event))
+        result, cost = run_async(run_servicing_foundry(request, request_id, on_event=_on_event, via_apim=via_apim))
     except Exception as exc:
         st.error(f"Gagal menjalankan agen Foundry: {exc}")
         st.stop()

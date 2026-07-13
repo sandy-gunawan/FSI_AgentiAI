@@ -27,7 +27,8 @@ def _rp(x) -> str:
 
 
 async def run_retail_foundry(
-    application: RetailLoanApplication, request_id: str, on_event=None
+    application: RetailLoanApplication, request_id: str, on_event=None,
+    via_apim: bool | None = None,
 ) -> tuple[dict, dict]:
     """Sequential retail assessment using Foundry-hosted agents. Returns (result, cost)."""
     audit = get_audit_logger()
@@ -65,7 +66,7 @@ async def run_retail_foundry(
     )
     decision = pol["decision"]
 
-    with foundry_session(request_id, "retail") as (runner, cost):
+    with foundry_session(request_id, "retail", via_apim) as (runner, cost):
         def _call(step, name, agent_key, prompt):
             return asyncio.to_thread(runner.run, step=step, name=name, agent_key=agent_key, prompt=prompt)
 

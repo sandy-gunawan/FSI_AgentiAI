@@ -17,7 +17,7 @@ from app.agents.shared.foundry_runner import FoundryAgentsNotProvisioned, load_a
 from app.governance.audit_log import get_audit_logger
 from app.observability.otel_setup import setup_observability
 from app.portal.agent_viz import FlowState, render_sme_html
-from app.portal.portal_utils import render_audit_legend, render_tech_log, rupiah, run_async
+from app.portal.portal_utils import render_audit_legend, render_gateway_toggle, render_tech_log, rupiah, run_async
 from app.workflows import data_access as sor
 from app.workflows.sme_foundry_workflow import run_sme_foundry
 
@@ -77,6 +77,7 @@ with viz:
 logc.markdown("#### 📜 Log Agentic (real-time)")
 log_ph = logc.empty()
 _log_render(log_ph, [])
+via_apim = render_gateway_toggle("sme")
 results = st.container()
 
 if submitted:
@@ -99,7 +100,7 @@ if submitted:
             _log_render(log_ph, lines)
 
     try:
-        result, cost = run_async(run_sme_foundry(req, request_id, on_event=_on_event))
+        result, cost = run_async(run_sme_foundry(req, request_id, on_event=_on_event, via_apim=via_apim))
     except Exception as exc:  # surface auth/registry/runtime errors cleanly
         st.error(f"Gagal menjalankan agen Foundry: {exc}")
         st.stop()

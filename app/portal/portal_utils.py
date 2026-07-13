@@ -27,6 +27,34 @@ def rupiah(amount: int | float | None) -> str:
     return f"Rp {int(amount):,}".replace(",", ".")
 
 
+def render_gateway_toggle(key: str) -> bool:
+    """Sidebar toggle: route this run via APIM AI Gateway vs direct to Foundry.
+
+    Returns the *requested* boolean; the effective route (which falls back to direct
+    when APIM is not configured) is shown as a badge. Pass the returned value as
+    ``via_apim=`` to the workflow.
+    """
+    import streamlit as st
+
+    from app.agents.shared.gateway import apim_configured, use_apim
+
+    with st.sidebar:
+        st.divider()
+        st.caption("🌐 AI Gateway (APIM)")
+        want = st.toggle(
+            "Route via APIM", value=st.session_state.get(f"{key}_apim", False), key=f"{key}_apim",
+            help="Kirim panggilan agen melalui Azure API Management (token limit, metrics, cache). "
+                 "Bila APIM belum dikonfigurasi, otomatis kembali ke DIRECT.",
+        )
+        effective = use_apim(want)
+        badge = "🟢 **APIM**" if effective else "⚪ **Direct**"
+        if want and not apim_configured():
+            st.caption(f"Rute efektif: {badge} · ⚠️ APIM belum dikonfigurasi → fallback direct")
+        else:
+            st.caption(f"Rute efektif: {badge}")
+    return want
+
+
 def render_tech_log(request_id: str, height: int = 260) -> None:
     """Collapsible, scrollable technical log proving the real MCP/API calls."""
     import streamlit as st

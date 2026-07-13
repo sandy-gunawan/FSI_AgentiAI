@@ -17,7 +17,7 @@ from app.core.models import SyndicationRequest
 from app.governance.audit_log import get_audit_logger
 from app.observability.otel_setup import setup_observability
 from app.portal.agent_viz import FlowState, render_a2a_html
-from app.portal.portal_utils import render_audit_legend, render_tech_log, rupiah, run_async
+from app.portal.portal_utils import render_audit_legend, render_gateway_toggle, render_tech_log, rupiah, run_async
 from app.workflows import data_access as sor
 from app.workflows.syndication_foundry_workflow import run_syndication_foundry
 
@@ -70,6 +70,7 @@ log_ph = logc.empty()
 with log_ph.container(height=VIZ_H):
     st.caption("Log Lead Arranger (Foundry) + panggilan A2A ke partner akan tampil di sini…")
 
+via_apim = render_gateway_toggle("syndication")
 results = st.container()
 
 if submitted:
@@ -93,7 +94,7 @@ if submitted:
                     st.markdown(ln)
 
     try:
-        result, cost, a2a_meta = run_async(run_syndication_foundry(request, request_id, on_event=_on_event))
+        result, cost, a2a_meta = run_async(run_syndication_foundry(request, request_id, on_event=_on_event, via_apim=via_apim))
     except Exception as exc:
         st.error(f"Gagal menjalankan agen Foundry: {exc}")
         st.stop()

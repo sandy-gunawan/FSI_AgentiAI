@@ -29,7 +29,8 @@ _STEPS = [
 
 
 async def run_magentic_foundry(
-    request: MagenticRequest, request_id: str, on_event=None
+    request: MagenticRequest, request_id: str, on_event=None,
+    via_apim: bool | None = None,
 ) -> tuple[dict, dict]:
     """Manager-coordinated, ledger-driven investigation with Foundry agents."""
     audit = get_audit_logger()
@@ -48,7 +49,7 @@ async def run_magentic_foundry(
     cust = sor.customer(request.subject_id)
     nik = cust["nik"]
 
-    with foundry_session(request_id, "magentic") as (runner, cost):
+    with foundry_session(request_id, "magentic", via_apim) as (runner, cost):
         def _call(step, name, agent_key, prompt):
             return asyncio.to_thread(runner.run, step=step, name=name, agent_key=agent_key, prompt=prompt)
 

@@ -26,6 +26,17 @@ class Settings(BaseSettings):
     foundry_project_endpoint: str = Field(default="", alias="FOUNDRY_PROJECT_ENDPOINT")
     foundry_model: str = Field(default="gpt-4o-mini", alias="FOUNDRY_MODEL")
 
+    # ---- AI Gateway (Azure API Management) — optional, OFF by default ----
+    # When enabled (and configured), agent calls are routed THROUGH APIM so the
+    # gateway can enforce token limits, emit token metrics, cache, etc. The toggle is
+    # additive: if not configured, the app transparently falls back to the direct path.
+    route_via_apim: bool = Field(default=False, alias="ROUTE_VIA_APIM")
+    apim_gateway_url: str = Field(default="", alias="APIM_GATEWAY_URL")  # e.g. https://<apim>.azure-api.net
+    apim_subscription_key: str = Field(default="", alias="APIM_SUBSCRIPTION_KEY")
+    apim_responses_path: str = Field(default="", alias="APIM_RESPONSES_PATH")  # v2 agents/responses base suffix
+    apim_chat_path: str = Field(default="", alias="APIM_CHAT_PATH")  # v1 chat-completions base suffix
+    apim_api_version: str = Field(default="2024-10-21", alias="APIM_API_VERSION")
+
     # ---- Observability ----
     enable_instrumentation: bool = Field(default=False, alias="ENABLE_INSTRUMENTATION")
     otel_exporter_otlp_endpoint: str = Field(default="", alias="OTEL_EXPORTER_OTLP_ENDPOINT")

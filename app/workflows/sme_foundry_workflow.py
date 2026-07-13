@@ -28,7 +28,8 @@ def _rp(x) -> str:
 
 
 async def run_sme_foundry(
-    request: SMEFinancingRequest, request_id: str, on_event=None
+    request: SMEFinancingRequest, request_id: str, on_event=None,
+    via_apim: bool | None = None,
 ) -> tuple[dict, dict]:
     """Concurrent SME analysis using Foundry-hosted agents. Returns (result, cost_summary)."""
     audit = get_audit_logger()
@@ -70,7 +71,7 @@ async def run_sme_foundry(
         ppatk_flag=bool(kyc.get("ppatk_flag", False)),
     )
 
-    with foundry_session(request_id, "sme") as (runner, cost):
+    with foundry_session(request_id, "sme", via_apim) as (runner, cost):
         _emit("orchestrator", "active",
               f"🧭 **Orchestrator (Foundry)** menyebar tugas ke 4 agen spesialis Foundry (PARALEL). "
               f"company_id={request.company_id}, plafon={_rp(request.requested_amount_idr)}.")

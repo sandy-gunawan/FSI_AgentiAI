@@ -44,7 +44,8 @@ def _classify(message: str) -> tuple[str, float]:
 
 
 async def run_servicing_foundry(
-    request: ServiceRequest, request_id: str, on_event=None
+    request: ServiceRequest, request_id: str, on_event=None,
+    via_apim: bool | None = None,
 ) -> tuple[dict, dict]:
     """Route one message to a Foundry handler agent. Returns (result, cost)."""
     audit = get_audit_logger()
@@ -62,7 +63,7 @@ async def run_servicing_foundry(
     intent, confidence = _classify(request.message)
     node, name, agent_key, status = _HANDLERS[intent]
 
-    with foundry_session(request_id, "servicing") as (runner, cost):
+    with foundry_session(request_id, "servicing", via_apim) as (runner, cost):
         def _call(step, disp, akey, prompt):
             return asyncio.to_thread(runner.run, step=step, name=disp, agent_key=akey, prompt=prompt)
 

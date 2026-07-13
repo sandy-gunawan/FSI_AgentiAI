@@ -27,7 +27,8 @@ _TYPOLOGY = {
 
 
 async def run_aml_foundry(
-    request: AmlInvestigationRequest, request_id: str, on_event=None
+    request: AmlInvestigationRequest, request_id: str, on_event=None,
+    via_apim: bool | None = None,
 ) -> tuple[dict, dict]:
     """Autonomous investigation + SAR drafting using Foundry agents. Returns (result, cost)."""
     audit = get_audit_logger()
@@ -53,7 +54,7 @@ async def run_aml_foundry(
     if sanctioned:
         evidence.append("sanksi_DTTOT terkonfirmasi")
 
-    with foundry_session(request_id, "aml") as (runner, cost):
+    with foundry_session(request_id, "aml", via_apim) as (runner, cost):
         def _call(step, name, agent_key, prompt):
             return asyncio.to_thread(runner.run, step=step, name=name, agent_key=agent_key, prompt=prompt)
 

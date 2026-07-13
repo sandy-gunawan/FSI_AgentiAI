@@ -39,7 +39,8 @@ def _scheme(iteration: int, cur_rate: float, remaining_tenor: int) -> dict:
 
 
 async def run_restructure_foundry(
-    request: RestructureRequest, request_id: str, on_event=None
+    request: RestructureRequest, request_id: str, on_event=None,
+    via_apim: bool | None = None,
 ) -> tuple[dict, dict]:
     """Iterative propose → evaluate with Foundry agents. Returns (result, cost)."""
     audit = get_audit_logger()
@@ -70,7 +71,7 @@ async def run_restructure_foundry(
     iterations = 0
     approved = False
 
-    with foundry_session(request_id, "restructure") as (runner, cost):
+    with foundry_session(request_id, "restructure", via_apim) as (runner, cost):
         def _call(step, name, agent_key, prompt):
             return asyncio.to_thread(runner.run, step=step, name=name, agent_key=agent_key, prompt=prompt)
 

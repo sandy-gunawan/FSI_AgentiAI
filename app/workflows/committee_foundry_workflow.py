@@ -33,7 +33,8 @@ _DEBATERS = [
 
 
 async def run_committee_foundry(
-    request: CommitteeRequest, request_id: str, on_event=None
+    request: CommitteeRequest, request_id: str, on_event=None,
+    via_apim: bool | None = None,
 ) -> tuple[dict, dict]:
     """Moderated committee debate over a borderline case using Foundry agents."""
     audit = get_audit_logger()
@@ -83,7 +84,7 @@ async def run_committee_foundry(
 
     transcript: list[dict] = []
 
-    with foundry_session(request_id, "committee") as (runner, cost):
+    with foundry_session(request_id, "committee", via_apim) as (runner, cost):
         def _call(step, name, agent_key, prompt):
             return asyncio.to_thread(runner.run, step=step, name=name, agent_key=agent_key, prompt=prompt)
 
