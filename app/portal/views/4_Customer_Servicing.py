@@ -10,7 +10,7 @@ from app.core.models import ServiceRequest
 from app.governance.audit_log import get_audit_logger
 from app.observability.otel_setup import setup_observability
 from app.portal.agent_viz import SERVICING_DETAILS, FlowState, render_servicing_html
-from app.portal.portal_utils import render_audit_legend, render_pattern_explainer, render_tech_log, run_async
+from app.portal.portal_utils import render_audit_legend, render_gateway_toggle, render_pattern_explainer, render_tech_log, run_async
 from app.workflows import data_access as sor
 from app.workflows.servicing_workflow import run_servicing
 
@@ -75,6 +75,7 @@ log_ph = logc.empty()
 with log_ph.container(height=VIZ_H):
     st.caption("Log langkah agen (input · tool · output) akan tampil di sini saat dijalankan…")
 
+via_apim = render_gateway_toggle("servicing")
 results = st.container()
 
 if submitted:
@@ -97,7 +98,7 @@ if submitted:
                 for ln in lines:
                     st.markdown(ln)
 
-    resolution, routing, cost = run_async(run_servicing(request, request_id, on_event=_on_event))
+    resolution, routing, cost = run_async(run_servicing(request, request_id, on_event=_on_event, via_apim=via_apim))
     with viz:
         components.html(render_servicing_html(fs.active, fs.done), height=VIZ_H)
 

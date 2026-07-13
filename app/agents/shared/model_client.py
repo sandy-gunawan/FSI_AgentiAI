@@ -159,17 +159,22 @@ class AgentRunner:
         return result.value if response_format else result.text
 
 
-def make_chat_client(credential: DefaultAzureCredential, via_apim: bool | None = None):
+def make_chat_client(credential: DefaultAzureCredential, via_apim: bool | None = None,
+                     use_case: str | None = None):
     """Build the chat client for one request: direct FoundryChatClient, or an
     OpenAI-compatible client pointed at the APIM gateway when routing via APIM."""
     s = get_settings()
     if use_apim(via_apim):
+        headers = dict(apim_headers())
+        headers["x-bns-tier"] = "v1"
+        if use_case:
+            headers["x-bns-usecase"] = use_case  # APIM meters/limits per use-case (v1)
         return OpenAIChatClient(
             model=s.foundry_model,
             base_url=apim_base_url("chat"),
             api_key=s.apim_subscription_key,       # APIM validates via subscription key header
             api_version=s.apim_api_version or None,
-            default_headers=apim_headers(),
+            default_headers=headers,
         )
     return FoundryChatClient(
         project_endpoint=s.foundry_project_endpoint,
@@ -188,7 +193,7 @@ async def financing_session(request_id: str, use_case: str, via_apim: bool | Non
     cost = CostTracker(request_id)
     route = route_label(via_apim)
     async with DefaultAzureCredential() as credential:
-        client = make_chat_client(credential, via_apim)
+        client = make_chat_client(credential, via_apim, use_case)
         runner = AgentRunner(client, request_id, use_case, cost, route=route)
         get_audit_logger().record(request_id, use_case, "gateway", f"route:{route}",
                                   f"Routing agen v1 via {route.upper()}", decision=route.upper())

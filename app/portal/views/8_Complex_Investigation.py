@@ -12,6 +12,7 @@ from app.observability.otel_setup import setup_observability
 from app.portal.agent_viz import MAGENTIC_DETAILS, FlowState, render_magentic_html
 from app.portal.portal_utils import (
     render_audit_legend,
+    render_gateway_toggle,
     render_pattern_explainer,
     render_tech_log,
     run_async,
@@ -84,6 +85,7 @@ log_ph = logc.empty()
 with log_ph.container(height=VIZ_H):
     st.caption("Rencana Manager & temuan worker akan tampil di sini…")
 
+via_apim = render_gateway_toggle("magentic")
 results = st.container()
 
 if submitted:
@@ -105,7 +107,7 @@ if submitted:
                 for ln in lines:
                     st.markdown(ln)
 
-    dossier, cost = run_async(run_magentic(request, request_id, on_event=_on_event))
+    dossier, cost = run_async(run_magentic(request, request_id, on_event=_on_event, via_apim=via_apim))
     with viz:
         components.html(render_magentic_html(fs.active, fs.done), height=VIZ_H)
 

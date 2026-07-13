@@ -12,6 +12,7 @@ from app.observability.otel_setup import setup_observability
 from app.portal.agent_viz import COMMITTEE_DETAILS, FlowState, render_committee_html
 from app.portal.portal_utils import (
     render_audit_legend,
+    render_gateway_toggle,
     render_pattern_explainer,
     render_tech_log,
     rupiah,
@@ -70,6 +71,7 @@ log_ph = logc.empty()
 with log_ph.container(height=VIZ_H):
     st.caption("Transkrip debat komite akan tampil di sini saat dijalankan…")
 
+via_apim = render_gateway_toggle("committee")
 results = st.container()
 
 if submitted:
@@ -95,7 +97,7 @@ if submitted:
                 for ln in lines:
                     st.markdown(ln)
 
-    decision, cost = run_async(run_committee(request, request_id, on_event=_on_event))
+    decision, cost = run_async(run_committee(request, request_id, on_event=_on_event, via_apim=via_apim))
     with viz:
         components.html(render_committee_html(fs.active, fs.done, rnd["n"] or None), height=VIZ_H)
 

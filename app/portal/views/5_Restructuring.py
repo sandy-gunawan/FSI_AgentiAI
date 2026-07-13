@@ -10,7 +10,7 @@ from app.core.models import RestructureRequest
 from app.governance.audit_log import get_audit_logger
 from app.observability.otel_setup import setup_observability
 from app.portal.agent_viz import RESTRUCTURE_DETAILS, FlowState, render_restructure_html
-from app.portal.portal_utils import render_audit_legend, render_pattern_explainer, render_tech_log, rupiah, run_async
+from app.portal.portal_utils import render_audit_legend, render_gateway_toggle, render_pattern_explainer, render_tech_log, rupiah, run_async
 from app.workflows import data_access as sor
 from app.workflows.restructure_workflow import run_restructure
 
@@ -82,6 +82,7 @@ log_ph = logc.empty()
 with log_ph.container(height=VIZ_H):
     st.caption("Log langkah agen (propose · evaluate · revise) akan tampil di sini…")
 
+via_apim = render_gateway_toggle("restructure")
 results = st.container()
 
 if submitted:
@@ -107,7 +108,7 @@ if submitted:
                 for ln in lines:
                     st.markdown(ln)
 
-    outcome, cost = run_async(run_restructure(request, request_id, on_event=_on_event))
+    outcome, cost = run_async(run_restructure(request, request_id, on_event=_on_event, via_apim=via_apim))
     with viz:
         components.html(render_restructure_html(fs.active, fs.done, outcome.iterations), height=VIZ_H)
 

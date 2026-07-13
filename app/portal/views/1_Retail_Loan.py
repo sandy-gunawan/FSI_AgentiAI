@@ -10,7 +10,7 @@ from app.core.models import EmploymentType, RetailLoanApplication
 from app.governance.audit_log import get_audit_logger
 from app.observability.otel_setup import setup_observability
 from app.portal.agent_viz import RETAIL_DETAILS, FlowState, render_retail_html
-from app.portal.portal_utils import render_audit_legend, render_pattern_explainer, render_tech_log, rupiah, run_async
+from app.portal.portal_utils import render_audit_legend, render_gateway_toggle, render_pattern_explainer, render_tech_log, rupiah, run_async
 from app.workflows import data_access as sor
 from app.workflows.retail_workflow import run_retail
 
@@ -66,6 +66,7 @@ log_ph = logc.empty()
 with log_ph.container(height=VIZ_H):
     st.caption("Log langkah agen (input · tool · output) akan tampil di sini saat dijalankan…")
 
+via_apim = render_gateway_toggle("retail")
 results = st.container()
 
 if submitted:
@@ -90,7 +91,7 @@ if submitted:
                 for ln in lines:
                     st.markdown(ln)
 
-    decision, cost = run_async(run_retail(application, request_id, on_event=_on_event))
+    decision, cost = run_async(run_retail(application, request_id, on_event=_on_event, via_apim=via_apim))
     with viz:
         components.html(render_retail_html(fs.active, fs.done), height=VIZ_H)
 

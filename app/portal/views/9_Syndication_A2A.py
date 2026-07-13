@@ -14,6 +14,7 @@ from app.observability.otel_setup import setup_observability
 from app.portal.agent_viz import A2A_DETAILS, FlowState, render_a2a_html
 from app.portal.portal_utils import (
     render_audit_legend,
+    render_gateway_toggle,
     render_pattern_explainer,
     render_tech_log,
     rupiah,
@@ -117,6 +118,7 @@ log_ph = logc.empty()
 with log_ph.container(height=VIZ_H):
     st.caption("Log Lead Arranger + panggilan A2A ke partner akan tampil di sini…")
 
+via_apim = render_gateway_toggle("syndication")
 results = st.container()
 
 if submitted:
@@ -139,7 +141,7 @@ if submitted:
                 for ln in lines:
                     st.markdown(ln)
 
-    result, cost, a2a_meta = run_async(run_syndication(request, request_id, on_event=_on_event))
+    result, cost, a2a_meta = run_async(run_syndication(request, request_id, on_event=_on_event, via_apim=via_apim))
     with viz:
         components.html(render_a2a_html(fs.active, fs.done), height=VIZ_H)
 

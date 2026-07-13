@@ -10,7 +10,7 @@ from app.core.models import AmlInvestigationRequest, SARDecision, SARRecommendat
 from app.governance.audit_log import get_audit_logger
 from app.observability.otel_setup import setup_observability
 from app.portal.agent_viz import AML_DETAILS, FlowState, render_aml_html
-from app.portal.portal_utils import render_audit_legend, render_pattern_explainer, render_tech_log, run_async
+from app.portal.portal_utils import render_audit_legend, render_gateway_toggle, render_pattern_explainer, render_tech_log, run_async
 from app.workflows import data_access as sor
 from app.workflows.aml_workflow import resume_aml_with_decision, run_aml_investigation
 from app.workflows.case_store import get_case_store
@@ -119,6 +119,7 @@ with tab_new:
     logc.markdown("#### 📜 Log Agentic (real-time)")
     log_a = logc.empty()
     _log_render(log_a, [])
+    via_apim = render_gateway_toggle("aml")
     out_a = st.container()
 
     if submitted:
@@ -139,7 +140,7 @@ with tab_new:
                 lines.insert(0, detail)
                 _log_render(log_a, lines)
 
-        rec, cost = run_async(run_aml_investigation(req, request_id, on_event=_on_event))
+        rec, cost = run_async(run_aml_investigation(req, request_id, on_event=_on_event, via_apim=via_apim))
         with viz_a:
             components.html(render_aml_html(fs.active, fs.done, fs.waiting), height=VIZ_H)
         with out_a:

@@ -105,9 +105,14 @@ class FoundryAgentRunner:
     def run(self, *, step: str, name: str, agent_key: str, prompt: str) -> str:
         """Invoke one Foundry-hosted agent by reference; track tokens + audit + tech log."""
         agent_name = self.agent_name(agent_key)
+        kwargs: dict = {}
+        if self.route == "apim":
+            # Tag the call so APIM can meter/limit per agent + use-case (see AI-gateway policies).
+            kwargs["extra_headers"] = {"x-bns-agent": agent_name, "x-bns-usecase": self.use_case}
         response = self.openai.responses.create(
             input=prompt,
             extra_body={"agent_reference": {"name": agent_name, "type": "agent_reference"}},
+            **kwargs,
         )
         text = getattr(response, "output_text", None) or ""
         usage = getattr(response, "usage", None)
