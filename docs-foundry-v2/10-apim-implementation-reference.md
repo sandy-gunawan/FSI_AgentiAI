@@ -49,6 +49,7 @@ threshold**, **semua kemampuan lain APIM**, plus **diagram high-level dan low-le
 7. [Full policy XML — v2 API](#7-full-policy-xml--v2-api-responses)
 8. [How each policy line works](#8-how-each-policy-line-works)
 8b. [Token sources + App Insights vs Log Analytics (newbie)](#8b-where-token-numbers-come-from--app-insights-vs-log-analytics-newbie)
+8c. [KQL cookbook — daily ops & optimization](#8c-kql-cookbook--daily-operations--optimization)
 9. [Sample threshold use cases](#9-sample-threshold-use-cases)
 10. [Everything else APIM can do](#10-everything-else-apim-can-do)
 11. [Verify, test & troubleshoot](#11-verify-test--troubleshoot)
@@ -571,6 +572,136 @@ az monitor diagnostic-settings create -n apim-logs --resource "<apim-resource-id
 >   Insights logger (now attached). Or, without any backend, read `data/audit.db` grouped by `actor`.
 > - **Who hit the limit (429)** → the app's **audit log** already has it (the run recorded route + a
 >   failure), or Log Analytics `GatewayLogs | where ResponseCode == 429` if you add the diagnostic.
+
+---
+
+## 8c) KQL cookbook — daily operations & optimization
+
+**Where to run:** App Insights `appi-finance-agenticai` → **Logs** (or Log Analytics). Token queries use
+the `customMetrics` table (fed by APIM `llm-emit-token-metric`, namespace `bns-genai`). Request/latency
+queries use the `requests` table (fed by the APIM App Insights diagnostic). Gateway request-log queries
+(`ApiManagementGatewayLogs`) need the optional **Log Analytics** diagnostic. / Jalankan di App Insights
+→ Logs.
+
+> **Note on metric fields:** an aggregated custom metric stores `valueSum` (sum of the emitted values)
+> and `valueCount` (number of calls). For `Total Tokens`, `sum(valueSum)` = total tokens; `sum(valueCount)`
+> = number of model calls.
+
+### A. Daily operations
+
+**A1 — Tokens per agent (last 24h), the go-to “who used what”:**
+```kusto
+customMetrics
+| where timestamp > ago(24h) and name == "Total Tokens"
+| extend Agent = tostring(customDimensions.Agent),
+         UseCase = tostring(customDimensions.UseCase),
+         Tier = tostring(customDimensions.Tier)
+| summarize Tokens = sum(valueSum), Calls = sum(valueCount) by Agent, UseCase, Tier
+| order by Tokens desc
+```
+
+**A2 — Hourly token trend (spot spikes):**
+```kusto
+customMetrics
+| where timestamp > ago(7d) and name == "Total Tokens"
+| summarize Tokens = sum(valueSum) by bin(timestamp, 1h)
+| render timechart
+```
+
+**A3 — Prompt vs completion split per agent (find verbose outputs):**
+```kusto
+customMetrics
+| where timestamp > ago(24h) and name in ("Prompt Tokens", "Completion Tokens")
+| extend Agent = tostring(customDimensions.Agent)
+| summarize Tokens = sum(valueSum) by name, Agent
+| evaluate pivot(name, sum(Tokens))
+```
+
+**A4 — Estimated cost per agent (gpt-4o-mini: $0.15 / 1M in, $0.60 / 1M out — adjust to your rate):**
+```kusto
+customMetrics
+| where timestamp > ago(1d) and name in ("Prompt Tokens", "Completion Tokens")
+| extend Agent = tostring(customDimensions.Agent)
+| summarize Prompt = sumif(valueSum, name == "Prompt Tokens"),
+            Completion = sumif(valueSum, name == "Completion Tokens") by Agent
+| extend CostUSD = round(Prompt/1000000*0.15 + Completion/1000000*0.60, 4)
+| order by CostUSD desc
+```
+
+**A5 — Calls, p95 latency, and errors per API (health at a glance):**
+```kusto
+requests
+| where timestamp > ago(1d) and tostring(customDimensions["API Name"]) != ""
+| summarize Calls = count(),
+            p95_ms = round(percentile(duration, 95), 0),
+            Errors = countif(success == false)
+         by API = tostring(customDimensions["API Name"])
+| order by Calls desc
+```
+
+**A6 — Throttle (429) events — did any agent hit its limit?:**
+```kusto
+requests
+| where timestamp > ago(1d) and resultCode == "429"
+| summarize Throttled = count() by API = tostring(customDimensions["API Name"]), bin(timestamp, 1h)
+| order by timestamp desc
+```
+
+### B. Optimization
+
+**B1 — Right-size `tokens-per-minute` from real usage (set the limit ~=1.5× p95):**
+```kusto
+customMetrics
+| where timestamp > ago(7d) and name == "Total Tokens"
+| extend Agent = tostring(customDimensions.Agent)
+| summarize TokensPerMin = sum(valueSum) by Agent, bin(timestamp, 1m)
+| summarize p50 = percentile(TokensPerMin, 50),
+            p95 = percentile(TokensPerMin, 95),
+            peak = max(TokensPerMin) by Agent
+| extend suggested_tpm = toint(p95 * 1.5)
+| order by p95 desc
+```
+
+**B2 — Most expensive per call (candidates to trim prompts / cache):**
+```kusto
+customMetrics
+| where timestamp > ago(1d) and name == "Total Tokens"
+| extend Agent = tostring(customDimensions.Agent), UseCase = tostring(customDimensions.UseCase)
+| summarize Tokens = sum(valueSum), Calls = sum(valueCount) by Agent, UseCase
+| extend TokensPerCall = round(Tokens * 1.0 / Calls, 0)
+| order by TokensPerCall desc
+```
+
+**B3 — Latency hotspots (slowest operations — co-locate model or cache):**
+```kusto
+requests
+| where timestamp > ago(1d) and tostring(customDimensions["API Name"]) != ""
+| summarize p50 = percentile(duration,50), p95 = percentile(duration,95), Calls = count()
+         by Op = tostring(customDimensions["Operation Name"])
+| order by p95 desc
+```
+
+**B4 — Error breakdown (fix the noisiest failure first):**
+```kusto
+requests
+| where timestamp > ago(1d) and success == false
+| summarize Count = count() by resultCode, API = tostring(customDimensions["API Name"])
+| order by Count desc
+```
+
+**B5 (needs Log Analytics diagnostic) — backend vs gateway errors:**
+```kusto
+ApiManagementGatewayLogs
+| where TimeGenerated > ago(1d)
+| summarize Calls = count(), Backend5xx = countif(BackendResponseCode >= 500),
+            Gateway4xx = countif(ResponseCode between (400 .. 499))
+         by ApiId
+| order by Calls desc
+```
+
+> **No-backend fallback:** every query above has an app-side equivalent in `data/audit.db` (per-agent
+> `actor`, `tokens`, `decision`) — the threshold and per-agent totals never *require* App Insights.
+> / Semua query punya padanan di `data/audit.db`; threshold & total per-agen tak wajib App Insights.
 
 ---
 
