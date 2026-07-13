@@ -74,6 +74,33 @@ def _extract_usage_tokens(usage: Any) -> tuple[int, int]:
     return int(inp), int(out)
 
 
+def _usage_snapshot(usage: Any) -> dict:
+    """Return a compact serializable snapshot of usage_details for traceability."""
+    if not usage:
+        return {}
+
+    if isinstance(usage, dict):
+        return {
+            "input_token_count": int(usage.get("input_token_count") or usage.get("prompt_tokens") or 0),
+            "output_token_count": int(usage.get("output_token_count") or usage.get("completion_tokens") or 0),
+            "total_token_count": int(
+                usage.get("total_token_count")
+                or ((usage.get("input_token_count") or usage.get("prompt_tokens") or 0)
+                    + (usage.get("output_token_count") or usage.get("completion_tokens") or 0))
+            ),
+            "raw": usage,
+        }
+
+    inp = int(getattr(usage, "input_token_count", None) or getattr(usage, "prompt_tokens", None) or 0)
+    out = int(getattr(usage, "output_token_count", None) or getattr(usage, "completion_tokens", None) or 0)
+    total = int(getattr(usage, "total_token_count", None) or (inp + out))
+    return {
+        "input_token_count": inp,
+        "output_token_count": out,
+        "total_token_count": total,
+    }
+
+
 class AgentRunner:
     """Runs Agent Framework agents with governance hooks attached."""
 
@@ -110,6 +137,12 @@ class AgentRunner:
         usage = getattr(result, "usage_details", None) or {}
         in_tok, out_tok = _extract_usage_tokens(usage)
         self.cost.add(in_tok, out_tok)
+        self.tech.append({
+            "tool": "model:usage",
+            "args": _trim({"step": step, "actor": name}),
+            "result": _trim(_usage_snapshot(usage), n=500),
+            "ms": 0.0,
+        })
 
         detail = redact_pii((result.text or "")[:600])
         self.audit.record(

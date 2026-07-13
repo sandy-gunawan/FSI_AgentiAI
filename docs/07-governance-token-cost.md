@@ -134,6 +134,13 @@ Runtime implementation anchor:
 - usage extraction helper: [app/agents/shared/model_client.py#L58](../app/agents/shared/model_client.py#L58)
 - token add into budget tracker: [app/agents/shared/model_client.py#L115](../app/agents/shared/model_client.py#L115)
 
+Where to see the real runtime payload now:
+
+- Each agent step appends a `model:usage` entry into technical log from `result.usage_details`.
+- The entry is visible in the UI technical log panel (same place as MCP/REST call traces).
+- Runtime source: [app/agents/shared/model_client.py](../app/agents/shared/model_client.py)
+- UI label mapping: [app/governance/tech_log.py](../app/governance/tech_log.py)
+
 ### ID: Contoh result dan cara ambil token
 
 Benar, token diambil dari object result hasil agent.run.
@@ -200,6 +207,7 @@ Foundry accuracy note:
 - The app tracks the usage reported in result.usage_details.
 - If Foundry returns input/output token fields, this app records those same values.
 - Accuracy differences usually come from aggregation scope (per-step vs per-request vs billing window), not from formula mismatch.
+- You can now inspect the per-step usage payload directly via the `model:usage` row in technical log.
 
 ### ID
 

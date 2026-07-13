@@ -27,6 +27,7 @@ _ENDPOINT = {
     "list_rules": ("MCP", "/mcp/policy-rules/", "Policy Rules MCP"),
     "a2a:discover": ("A2A", "/.well-known/agent-card.json", "Partner Bank (BMS) — Agent Card"),
     "a2a:message/send": ("A2A JSON-RPC", "/a2a", "Partner Bank (BMS) — co-underwrite"),
+    "model:usage": ("MODEL", "usage_details", "Foundry usage_details (actual result payload)"),
 }
 
 
