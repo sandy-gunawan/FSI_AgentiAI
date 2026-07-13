@@ -4,6 +4,11 @@ This folder explains **how the app is built in code**: what an "agent" actually 
 how the **Microsoft Agent Framework** is called, how each use case is **orchestrated**, where
 **decisions** are made, and how the **MCP** and **A2A** protocols are wired.
 
+> 🟣 **Looking for the v2, Foundry-hosted version?** There is a parallel doc set at
+> **[../docs-foundry-v2/](../docs-foundry-v2/README.md)** that explains, at the code level, how each
+> use case is **called in Microsoft Foundry** (agents provisioned as prompt agents and invoked by
+> reference), while keeping the same orchestration and governance described here.
+
 Read in this order:
 
 | # | Doc | What it answers |

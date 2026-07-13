@@ -16,6 +16,12 @@ on Azure**, so they are callable over HTTPS from any system — not just this ap
 > ☁️ **Need Azure deployment steps?** Follow **[docs/05-deploy-to-azure.md](docs/05-deploy-to-azure.md)**
 > for beginner-friendly, copy-paste commands (build images, update Container Apps, set env vars,
 > verify portal/systems/partner URLs).
+>
+> 🟣 **New feature — v2: agents hosted in Microsoft Foundry.** Every use case now also runs with the
+> agents provisioned as **persistent Foundry prompt agents** (called by reference) instead of built
+> in code — same orchestration, same governance. See the dedicated doc set
+> **[docs-foundry-v2/](docs-foundry-v2/README.md)** and the **🟣 Hosted di Foundry (v2)** group in the
+> portal nav.
 
 ---
 
@@ -90,6 +96,33 @@ Investigator ─(reason → act → observe loop, chooses tools dynamically)─�
 ```
 A single Investigator agent decides which back-office tools to call based on what it observes; a human
 analyst confirms filing (case paused & persisted, like Use Case 2).
+
+---
+
+## v2 — Same use cases, agents hosted in Microsoft Foundry 🟣
+
+Every use case ships in **two flavors**, side by side (v1 pages are untouched):
+
+- **v1 (in-code agents):** an agent = *instructions + tools* handed to a local runner that builds a
+  Microsoft Agent Framework `Agent` on the fly.
+- **v2 (Foundry-hosted agents):** the ~30 agents were **provisioned once** into a Foundry project as
+  **prompt agents** (instructions + MCP/REST tools + model). The v2 workflows **call them by
+  reference** via the Responses API `agent_reference`; Foundry runs the tool-calling loop server-side.
+
+**What stays the same:** the Python **orchestration** (sequential / concurrent / routing / loops /
+group chat / magentic / A2A), the **deterministic OJK/BI decisions**, and the full **governance**
+(audit log, real token usage, cost, technical log). Only *where the agent object lives* changed.
+
+| Piece | v1 | v2 |
+|-------|----|----|
+| Runner | `AgentRunner` ([model_client.py](app/agents/shared/model_client.py)) | `FoundryAgentRunner` ([foundry_runner.py](app/agents/shared/foundry_runner.py)) |
+| Orchestration | `app/workflows/<uc>_workflow.py` | `app/workflows/<uc>_foundry_workflow.py` |
+| UI pages | `views/<n>_<UseCase>.py` | `views/1x_<UseCase>_on_Foundry.py` (nav group **🟣 Hosted di Foundry (v2)**) |
+| Agents | inline strings | provisioned by [scripts/provision_foundry_agents.py](scripts/provision_foundry_agents.py) → [data/foundry_agents.json](data/foundry_agents.json) |
+
+📚 **Full v2 documentation:** **[docs-foundry-v2/](docs-foundry-v2/README.md)** — a parallel 8-doc set
+(mirrors [docs/](docs/README.md)) explaining, at the code level, how each use case is called in
+Foundry, how the tools are attached, how to provision/deploy, and how governance + observability work.
 
 ---
 
