@@ -157,10 +157,11 @@ sequenceDiagram
     W->>R: foundry_session(request_id, "retail", via_apim=True)
     Note over R,C: OpenAI(base_url=/foundry,<br/>api_key=subscription-key,<br/>default_headers=Ocp-Apim-Subscription-Key)
     loop each agent step (by agent_reference)
-        R->>C: responses.create(input, agent_reference,<br/>extra_headers: x-bns-agent, x-bns-usecase)
+        R->>C: responses.create(input, agent_reference) + extra_headers x-bns-agent/x-bns-usecase
         C->>G: POST /foundry/.../responses
         Note over G: inbound: llm-token-limit<br/>(counter-key=x-bns-agent)<br/>+ managed identity
-        G->>F: forwards; Foundry runs the tool loop<br/>(MCP + REST attached to the agent)
+        G->>F: forwards with AAD token
+        Note over F: Foundry runs the tool loop<br/>MCP + REST attached to the agent
         F-->>G: response.output_text + response.usage
         Note over G: outbound: llm-emit-token-metric<br/>(dims Agent, UseCase)
         G-->>C: 200 + usage
@@ -173,6 +174,82 @@ sequenceDiagram
 ---
 
 ## 4) How the code calls APIM
+
+### 4.0 The full chain: portal → (code or Foundry) → APIM → model
+
+**One clarification first / Klarifikasi:** the portal does **not** decide "code vs Foundry" at runtime —
+that is simply **which page you open**: the v1 pages run the **in-code** agents, the v2 pages call the
+**Foundry-hosted** agents. What the portal decides **per run** is the **Route via APIM** toggle. When
+that toggle is on (and APIM is configured), *both* v1 and v2 point their model client at APIM, and
+**APIM forwards the call to the model**. / Portal tidak memilih "code vs Foundry" saat runtime — itu
+tergantung **halaman** yang dibuka; yang dipilih **per run** adalah toggle **Route via APIM**.
+
+```mermaid
+flowchart TD
+    A["User opens a portal page"] --> B{"Which page?"}
+    B -->|v1 page| C["v1 workflow<br/>in-code agents"]
+    B -->|v2 page| D["v2 workflow<br/>Foundry-hosted agents"]
+    C --> T["render_gateway_toggle() sets via_apim"]
+    D --> T
+    T --> U{"use_apim(via_apim)?<br/>requested AND configured"}
+    U -->|No| DIR["DIRECT to Foundry<br/>FoundryChatClient / get_openai_client"]
+    U -->|Yes| CLI["client base_url = APIM<br/>+ Ocp-Apim-Subscription-Key"]
+    CLI --> API["APIM POST /responses<br/>token-limit + emit-metric<br/>+ managed identity"]
+    API --> M["gpt-4o-mini on Foundry"]
+    DIR --> M
+    M --> R["usage returned to cost + audit"]
+```
+
+**Step by step, with the real code:**
+
+**1) The portal page reads the toggle** — [app/portal/portal_utils.py](../app/portal/portal_utils.py):
+```python
+via_apim = render_gateway_toggle("retail")   # sidebar "Route via APIM"; True/False/None
+# ... passed straight into the workflow for THIS run:
+result, cost = await run_retail(application, request_id, via_apim=via_apim)          # v1 page
+result, cost = await run_retail_foundry(application, request_id, via_apim=via_apim)  # v2 page
+```
+
+**2) The gateway helper decides direct vs APIM** — [app/agents/shared/gateway.py](../app/agents/shared/gateway.py):
+```python
+def use_apim(via_apim=None) -> bool:
+    want = get_settings().route_via_apim if via_apim is None else bool(via_apim)
+    return want and apim_configured()          # True only if requested AND configured
+```
+
+**3a) v1 (code) builds a client pointed at APIM** — [model_client.py](../app/agents/shared/model_client.py):
+```python
+if use_apim(via_apim):
+    return OpenAIChatClient(base_url=apim_base_url("chat"),   # https://apim.../openai
+                            api_key=s.apim_subscription_key,
+                            default_headers={**apim_headers(), "x-bns-usecase": use_case})
+# else: FoundryChatClient(...) -> DIRECT to Foundry
+```
+
+**3b) v2 (Foundry) injects an OpenAI client pointed at APIM** — [foundry_runner.py](../app/agents/shared/foundry_runner.py):
+```python
+if use_apim(via_apim):
+    openai_client = OpenAI(base_url=apim_base_url("responses"),  # https://apim.../foundry
+                           api_key=s.apim_subscription_key,
+                           default_headers=apim_headers())
+# runner.run() also sends per-call: extra_headers={"x-bns-agent":..., "x-bns-usecase":...}
+```
+
+**4) APIM receives `POST /responses`, applies policy, and calls the model** — [infra/apim/policy-v1.xml](../infra/apim/policy-v1.xml):
+```xml
+<set-backend-service base-url="https://bnsfoundryer3wj7.services.ai.azure.com/api/projects/financing/openai/v1" />
+<authentication-managed-identity resource="https://ai.azure.com" />  <!-- APIM's own AAD token -->
+<llm-token-limit counter-key="@(context.Request.Headers.GetValueOrDefault(&quot;x-bns-usecase&quot;,&quot;unknown&quot;))" tokens-per-minute="6000" />
+<llm-emit-token-metric namespace="bns-genai"> ... </llm-emit-token-metric>
+```
+So yes — **APIM is the one that calls the model** (`gpt-4o-mini`): the client only ever talks to the
+gateway URL; APIM swaps in its managed-identity token, meters/limits, then forwards to Foundry and
+returns the response `usage` back to the app. / **APIM yang memanggil model**; klien hanya bicara ke
+URL gateway.
+
+---
+
+### 4.1 The routing helper
 
 The whole routing decision lives in one tiny module — [app/agents/shared/gateway.py](../app/agents/shared/gateway.py):
 
