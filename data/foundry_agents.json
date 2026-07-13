@@ -1,0 +1,239 @@
+{
+  "project_endpoint": "https://bnsfoundryer3wj7.services.ai.azure.com/api/projects/financing",
+  "model": "gpt-4o-mini",
+  "systems_url": "https://ca-bns-systems.delightfulisland-5bc416ad.eastus2.azurecontainerapps.io",
+  "agents": {
+    "retail-intake": {
+      "id": "retail-intake:2",
+      "name": "retail-intake",
+      "version": "2",
+      "mcp": [
+        "kyc_aml"
+      ],
+      "rest": true
+    },
+    "retail-credit-risk": {
+      "id": "retail-credit-risk:1",
+      "name": "retail-credit-risk",
+      "version": "1",
+      "mcp": [
+        "credit_bureau"
+      ],
+      "rest": false
+    },
+    "retail-decision": {
+      "id": "retail-decision:1",
+      "name": "retail-decision",
+      "version": "1",
+      "mcp": [],
+      "rest": false
+    },
+    "sme-financial-analyst": {
+      "id": "sme-financial-analyst:2",
+      "name": "sme-financial-analyst",
+      "version": "2",
+      "mcp": [],
+      "rest": true
+    },
+    "sme-collateral-agent": {
+      "id": "sme-collateral-agent:2",
+      "name": "sme-collateral-agent",
+      "version": "2",
+      "mcp": [],
+      "rest": true
+    },
+    "sme-aml-fraud-agent": {
+      "id": "sme-aml-fraud-agent:1",
+      "name": "sme-aml-fraud-agent",
+      "version": "1",
+      "mcp": [
+        "kyc_aml"
+      ],
+      "rest": false
+    },
+    "sme-market-risk-agent": {
+      "id": "sme-market-risk-agent:1",
+      "name": "sme-market-risk-agent",
+      "version": "1",
+      "mcp": [],
+      "rest": false
+    },
+    "sme-underwriting-orchestrator": {
+      "id": "sme-underwriting-orchestrator:1",
+      "name": "sme-underwriting-orchestrator",
+      "version": "1",
+      "mcp": [
+        "policy_rules"
+      ],
+      "rest": false
+    },
+    "sme-termsheet-agent": {
+      "id": "sme-termsheet-agent:1",
+      "name": "sme-termsheet-agent",
+      "version": "1",
+      "mcp": [],
+      "rest": false
+    },
+    "servicing-router": {
+      "id": "servicing-router:1",
+      "name": "servicing-router",
+      "version": "1",
+      "mcp": [],
+      "rest": false
+    },
+    "servicing-dispute": {
+      "id": "servicing-dispute:2",
+      "name": "servicing-dispute",
+      "version": "2",
+      "mcp": [],
+      "rest": true
+    },
+    "servicing-limit-increase": {
+      "id": "servicing-limit-increase:2",
+      "name": "servicing-limit-increase",
+      "version": "2",
+      "mcp": [
+        "credit_bureau"
+      ],
+      "rest": true
+    },
+    "servicing-hardship": {
+      "id": "servicing-hardship:2",
+      "name": "servicing-hardship",
+      "version": "2",
+      "mcp": [],
+      "rest": true
+    },
+    "servicing-balance": {
+      "id": "servicing-balance:2",
+      "name": "servicing-balance",
+      "version": "2",
+      "mcp": [],
+      "rest": true
+    },
+    "servicing-general": {
+      "id": "servicing-general:1",
+      "name": "servicing-general",
+      "version": "1",
+      "mcp": [],
+      "rest": false
+    },
+    "restructure-proposer": {
+      "id": "restructure-proposer:2",
+      "name": "restructure-proposer",
+      "version": "2",
+      "mcp": [
+        "credit_bureau"
+      ],
+      "rest": true
+    },
+    "restructure-evaluator": {
+      "id": "restructure-evaluator:1",
+      "name": "restructure-evaluator",
+      "version": "1",
+      "mcp": [
+        "policy_rules"
+      ],
+      "rest": false
+    },
+    "restructure-writer": {
+      "id": "restructure-writer:1",
+      "name": "restructure-writer",
+      "version": "1",
+      "mcp": [],
+      "rest": false
+    },
+    "aml-investigator": {
+      "id": "aml-investigator:2",
+      "name": "aml-investigator",
+      "version": "2",
+      "mcp": [
+        "kyc_aml",
+        "credit_bureau"
+      ],
+      "rest": true
+    },
+    "aml-sar-writer": {
+      "id": "aml-sar-writer:1",
+      "name": "aml-sar-writer",
+      "version": "1",
+      "mcp": [],
+      "rest": false
+    },
+    "committee-risk-optimist": {
+      "id": "committee-risk-optimist:1",
+      "name": "committee-risk-optimist",
+      "version": "1",
+      "mcp": [],
+      "rest": false
+    },
+    "committee-risk-skeptic": {
+      "id": "committee-risk-skeptic:1",
+      "name": "committee-risk-skeptic",
+      "version": "1",
+      "mcp": [],
+      "rest": false
+    },
+    "committee-compliance": {
+      "id": "committee-compliance:1",
+      "name": "committee-compliance",
+      "version": "1",
+      "mcp": [
+        "policy_rules"
+      ],
+      "rest": false
+    },
+    "committee-chair": {
+      "id": "committee-chair:1",
+      "name": "committee-chair",
+      "version": "1",
+      "mcp": [],
+      "rest": false
+    },
+    "magentic-manager-plan": {
+      "id": "magentic-manager-plan:1",
+      "name": "magentic-manager-plan",
+      "version": "1",
+      "mcp": [],
+      "rest": false
+    },
+    "magentic-manager-replan": {
+      "id": "magentic-manager-replan:1",
+      "name": "magentic-manager-replan",
+      "version": "1",
+      "mcp": [],
+      "rest": false
+    },
+    "magentic-manager-dossier": {
+      "id": "magentic-manager-dossier:1",
+      "name": "magentic-manager-dossier",
+      "version": "1",
+      "mcp": [],
+      "rest": false
+    },
+    "magentic-worker": {
+      "id": "magentic-worker:2",
+      "name": "magentic-worker",
+      "version": "2",
+      "mcp": [
+        "kyc_aml",
+        "credit_bureau"
+      ],
+      "rest": true
+    },
+    "syndication-lead-arranger": {
+      "id": "syndication-lead-arranger:1",
+      "name": "syndication-lead-arranger",
+      "version": "1",
+      "mcp": [],
+      "rest": false
+    },
+    "syndication-synthesizer": {
+      "id": "syndication-synthesizer:1",
+      "name": "syndication-synthesizer",
+      "version": "1",
+      "mcp": [],
+      "rest": false
+    }
+  }
+}

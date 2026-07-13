@@ -29,13 +29,16 @@ syndication = st.Page("views/9_Syndication_A2A.py", title="Sindikasi — A2A (Ag
 audit = st.Page("views/3_Audit_Governance.py", title="Audit & Governance", icon="🛡️")
 faq = st.Page("views/10_FAQ.py", title="FAQ & Referensi", icon="📖")
 
+sme_foundry = st.Page("views/11_SME_on_Foundry.py", title="UKM — Agen di Foundry (v2)", icon="🟣")
+
 pg = st.navigation(
     {
         "🏠 Beranda": [home],
         "🧭 Orkestrasi — Dasar": [retail, sme, servicing],
         "🧠 Orkestrasi — Lanjutan": [restructure, aml, committee, magentic],
         "🔗 Interoperabilitas (A2A)": [syndication],
-        "🛡️ Governance": [audit],
+        "� Hosted di Foundry (v2)": [sme_foundry],
+        "�🛡️ Governance": [audit],
         "📖 Belajar": [faq],
     }
 )

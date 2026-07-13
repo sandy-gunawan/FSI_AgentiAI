@@ -15,6 +15,7 @@ Read in this order:
 | 5 | [05-deploy-to-azure.md](05-deploy-to-azure.md) | Newbie step-by-step Azure deployment: build images, update Container Apps, set env vars, verify live URLs. |
 | 6 | [06-use-case-code-walkthrough.md](06-use-case-code-walkthrough.md) | **Bilingual (EN/ID)** code-level trace for each use case: page -> workflow -> agents -> tools -> outputs -> where token/cost/time are shown. |
 | 7 | [07-governance-token-cost.md](07-governance-token-cost.md) | **Bilingual (EN/ID)** governance internals: audit logging, technical logs, token accounting, cost formula, realism caveats, and how to retrieve numbers. |
+| 8 | [08-observability-and-analytics.md](08-observability-and-analytics.md) | **Bilingual (EN/ID)** observability layer: OpenTelemetry -> Application Insights, how to log/instrument, access, and query telemetry with KQL examples. |
 
 > Diagrams use **Mermaid**, which renders in VS Code's Markdown preview and on GitHub.
 

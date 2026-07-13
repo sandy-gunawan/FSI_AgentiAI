@@ -1,0 +1,22 @@
+# Keep the ACR build context small & clean (no local venv, git, caches, or runtime state).
+.venv/
+.git/
+.github/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+
+# Local runtime state / secrets
+.env
+*.log
+data/*.db
+data/*.sqlite
+.checkpoints/
+
+# Docs & editor
+docs/
+.vscode/
+.idea/
+.DS_Store

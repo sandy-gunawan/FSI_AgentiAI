@@ -1,0 +1,133 @@
+{
+  "version": "Notebook/1.0",
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# 🏦 BNS Agent Analytics\nToken usage, latency, GenAI calls and errors for the agentic financing app (`cloud_RoleName == bns-financing-agents`).\n\n> Attribute keys follow OpenTelemetry GenAI semantic conventions. If token columns are empty, run the **Discover attributes** tile and adjust the `customDimensions[...]` keys."
+      },
+      "name": "text-intro"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "bns-timerange",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "label": "Time range",
+            "type": 4,
+            "value": { "durationMs": 86400000 },
+            "typeSettings": {
+              "selectableValues": [
+                { "durationMs": 3600000 },
+                { "durationMs": 14400000 },
+                { "durationMs": 86400000 },
+                { "durationMs": 604800000 },
+                { "durationMs": 2592000000 }
+              ]
+            }
+          }
+        ],
+        "style": "pills",
+        "queryType": 0
+      },
+      "name": "parameters"
+    },
+    {
+      "type": 1,
+      "content": { "json": "## 1 · Discover attributes (run first)" },
+      "name": "text-discover"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "dependencies\n| where cloud_RoleName == \"bns-financing-agents\"\n| take 20\n| project timestamp, name, duration, target, customDimensions",
+        "size": 0,
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "visualization": "table"
+      },
+      "name": "query-discover"
+    },
+    {
+      "type": 1,
+      "content": { "json": "## 2 · Model (GenAI) calls with token usage" },
+      "name": "text-genai"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "dependencies\n| where cloud_RoleName == \"bns-financing-agents\"\n| where tostring(customDimensions) has \"gen_ai\"\n| extend model = tostring(customDimensions[\"gen_ai.request.model\"]),\n         in_tok = toint(customDimensions[\"gen_ai.usage.input_tokens\"]),\n         out_tok = toint(customDimensions[\"gen_ai.usage.output_tokens\"])\n| project timestamp, name, duration_ms=duration, model, in_tok, out_tok, operation_Id\n| order by timestamp desc\n| take 100",
+        "size": 0,
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "visualization": "table"
+      },
+      "name": "query-genai-calls"
+    },
+    {
+      "type": 1,
+      "content": { "json": "## 3 · Token usage over time" },
+      "name": "text-tokens"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "dependencies\n| where cloud_RoleName == \"bns-financing-agents\"\n| where tostring(customDimensions) has \"gen_ai.usage\"\n| extend in_tok = toint(customDimensions[\"gen_ai.usage.input_tokens\"]),\n         out_tok = toint(customDimensions[\"gen_ai.usage.output_tokens\"])\n| summarize input_tokens=sum(in_tok), output_tokens=sum(out_tok) by bin(timestamp, 1h)",
+        "size": 0,
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "visualization": "timechart"
+      },
+      "name": "query-tokens-time"
+    },
+    {
+      "type": 1,
+      "content": { "json": "## 4 · Latency by operation (P50 / P95)" },
+      "name": "text-latency"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "dependencies\n| where cloud_RoleName == \"bns-financing-agents\"\n| summarize p50=percentile(duration,50), p95=percentile(duration,95), calls=count() by name\n| order by p95 desc",
+        "size": 0,
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "visualization": "table"
+      },
+      "name": "query-latency"
+    },
+    {
+      "type": 1,
+      "content": { "json": "## 5 · Errors & exceptions" },
+      "name": "text-errors"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "exceptions\n| where cloud_RoleName == \"bns-financing-agents\"\n| project timestamp, type, outerMessage, operation_Id, method\n| order by timestamp desc\n| take 100",
+        "size": 0,
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "visualization": "table"
+      },
+      "name": "query-errors"
+    }
+  ],
+  "fallbackResourceIds": [],
+  "fromTemplateId": "bns-agent-analytics"
+}

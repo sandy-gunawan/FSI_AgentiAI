@@ -3,9 +3,12 @@ agent-framework
 
 # ---- Azure / Foundry ----
 azure-identity
-azure-ai-projects
+azure-ai-projects>=2.1.0
 azure-ai-contentsafety
 azure-monitor-opentelemetry
+
+# ---- Foundry agent provisioning script (scripts/provision_foundry_agents.py) ----
+jsonref
 
 # ---- OpenTelemetry (local Aspire dashboard export) ----
 opentelemetry-exporter-otlp-proto-grpc
