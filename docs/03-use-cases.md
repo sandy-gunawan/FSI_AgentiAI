@@ -7,6 +7,11 @@ with a diagram. Remember from [01](01-what-is-an-agent.md): an "agent" = an **in
 Legend: 🟦 = LLM agent (`runner.run`) · 🟩 = deterministic Python (no LLM) · 🧑‍⚖️ = human gate ·
 🔌 = MCP tool · 🌐 = REST tool · 🤝 = A2A.
 
+Need deeper implementation details (code POV, metrics visibility, and governance proofs)?
+
+- Per-use-case code trace (EN/ID): [06-use-case-code-walkthrough.md](06-use-case-code-walkthrough.md)
+- Governance, logs, tokens, cost internals (EN/ID): [07-governance-token-cost.md](07-governance-token-cost.md)
+
 ---
 
 ## 1 · Retail Personal Loan — Sequential (Prompt Chaining)

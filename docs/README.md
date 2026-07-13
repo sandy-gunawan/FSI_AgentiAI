@@ -13,6 +13,8 @@ Read in this order:
 | 3 | [03-use-cases.md](03-use-cases.md) | For **each of the 8 use cases**: entry point, components, agents, orchestration, diagram, decisions. |
 | 4 | [04-surrounding-systems.md](04-surrounding-systems.md) | The **REST / MCP / A2A** systems around the agents: what they are, why one container, what data, and **exactly how to call them** (URLs, auth, examples). |
 | 5 | [05-deploy-to-azure.md](05-deploy-to-azure.md) | Newbie step-by-step Azure deployment: build images, update Container Apps, set env vars, verify live URLs. |
+| 6 | [06-use-case-code-walkthrough.md](06-use-case-code-walkthrough.md) | **Bilingual (EN/ID)** code-level trace for each use case: page -> workflow -> agents -> tools -> outputs -> where token/cost/time are shown. |
+| 7 | [07-governance-token-cost.md](07-governance-token-cost.md) | **Bilingual (EN/ID)** governance internals: audit logging, technical logs, token accounting, cost formula, realism caveats, and how to retrieve numbers. |
 
 > Diagrams use **Mermaid**, which renders in VS Code's Markdown preview and on GitHub.
 
@@ -28,3 +30,5 @@ Read in this order:
   in [app/workflows/&lt;use_case&gt;_workflow.py](../app/workflows). That is the "multi-agent" logic.
 - **Decisions** are split on purpose: **deterministic** rules (OJK/BI policy, affordability) are
   plain Python; **reasoning + narrative** is done by the LLM agents.
+- For operators and auditors, read [06-use-case-code-walkthrough.md](06-use-case-code-walkthrough.md)
+  and [07-governance-token-cost.md](07-governance-token-cost.md) after [03-use-cases.md](03-use-cases.md).
