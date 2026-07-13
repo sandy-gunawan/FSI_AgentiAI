@@ -48,6 +48,7 @@ threshold**, **semua kemampuan lain APIM**, plus **diagram high-level dan low-le
 6. [Full policy XML — v1 API](#6-full-policy-xml--v1-api-chatcompletions)
 7. [Full policy XML — v2 API](#7-full-policy-xml--v2-api-responses)
 8. [How each policy line works](#8-how-each-policy-line-works)
+8b. [Token sources + App Insights vs Log Analytics (newbie)](#8b-where-token-numbers-come-from--app-insights-vs-log-analytics-newbie)
 9. [Sample threshold use cases](#9-sample-threshold-use-cases)
 10. [Everything else APIM can do](#10-everything-else-apim-can-do)
 11. [Verify, test & troubleshoot](#11-verify-test--troubleshoot)
@@ -503,6 +504,73 @@ dimensions are keyed on `x-bns-agent`** (v2 tags the agent per call).
 section (APIM hooks the response automatically to read `usage`). Putting `llm-emit-token-metric` in
 `outbound` fails validation ("Policy is not allowed in this section"). / **Penempatan:** `llm-token-limit`
 dan `llm-emit-token-metric` keduanya di **`inbound`**; menaruh emit di `outbound` gagal validasi.
+
+---
+
+## 8b) Where token numbers come from + App Insights vs Log Analytics (newbie)
+
+**EN:** There are **two separate token “meters,”** and beginners often mix them up. **ID:** Ada **dua
+“pengukur” token** yang berbeda — pemula sering tertukar.
+
+| Meter | Who counts it | Where it lives | Needs a logging backend? |
+|---|---|---|---|
+| **App-measured** | your **code** reads `response.usage` after each call | `data/audit.db` (audit log) + the cost panel in the UI; app traces also go to App Insights `appi-finance-agenticai` | ❌ No — it's just your app |
+| **Gateway-measured** | **APIM** via `llm-emit-token-metric` | App Insights **only if a logger is attached to APIM** → `customMetrics` namespace `bns-genai` | ✅ Yes (App Insights) |
+
+### Enforcement vs observability / Penegakan vs visibilitas
+
+- **The threshold (HTTP 429) needs NO logging backend.** APIM counts tokens in its own memory and
+  rejects when over budget. So limits work even with zero App Insights / Log Analytics. / **Batas (429)
+  tidak butuh backend log apa pun** — APIM menghitung sendiri.
+- **Seeing the numbers** is the only thing that needs a backend — and even then, the **app already
+  records per-agent tokens** in the audit log + cost panel. / **Melihat angka** yang butuh backend; tapi
+  app sudah mencatat token per-agen.
+
+### App Insights vs Log Analytics for APIM — which one? / Yang mana?
+
+**EN:** They are different tools for different questions; you can use **both**. **ID:** Dua alat beda
+untuk pertanyaan beda; boleh pakai **keduanya**.
+
+| You want to see… | Use | Why |
+|---|---|---|
+| **Per-agent / per-use-case token totals** (the `emit-token-metric` numbers, §9 KQL) | **Application Insights** (a *logger* attached to APIM) | The emit-metric policy publishes to the App Insights instance wired as APIM's logger. |
+| **Raw request logs** — who called, status code, latency, backend | **Log Analytics** (a *Diagnostic setting* → `GatewayLogs`) | Gateway request logs are a resource-log category, sent to a Log Analytics workspace. |
+| **A single per-call policy trace** (what each policy did) | Nothing — use the **Test tab → Trace** or header `Ocp-Apim-Trace: true` | Built-in, no setup. |
+
+> **✅ Done in this deployment:** an Application Insights **logger** (`appinsights` →
+> `appi-finance-agenticai`) plus per-API **diagnostics** are attached to both APIs, so the
+> `llm-emit-token-metric` numbers now flow and the §9 KQL works. Log Analytics (request logs) is
+> **optional** and not wired. / **Sudah dipasang:** logger App Insights + diagnostic per-API, jadi
+> metrik token mengalir dan KQL §9 jalan. Log Analytics opsional.
+
+**How it was attached (App Insights logger, via ARM):**
+```powershell
+$base = "https://management.azure.com/subscriptions/$sub/resourceGroups/$RG/providers/Microsoft.ApiManagement/service/$APIM"
+# 1. logger -> App Insights instance
+az rest --method put --uri "$base/loggers/appinsights?api-version=2022-08-01" --body (@{
+  properties=@{ loggerType="applicationInsights"; resourceId=$AI_RESOURCE_ID;
+                credentials=@{ instrumentationKey=$AI_IKEY } } } | ConvertTo-Json -Depth 8)
+# 2. per-API diagnostic (metrics=true enables emit-token-metric)
+az rest --method put --uri "$base/apis/bns-v2-foundry/diagnostics/applicationinsights?api-version=2022-08-01" --body (@{
+  properties=@{ loggerId="$base/loggers/appinsights"; alwaysLog="allErrors";
+                sampling=@{ samplingType="fixed"; percentage=100 }; metrics=$true } } | ConvertTo-Json -Depth 8)
+```
+
+**Optional — add Log Analytics for request logs:**
+```powershell
+az monitor diagnostic-settings create -n apim-logs --resource "<apim-resource-id>" `
+  --workspace "<log-analytics-workspace-id>" `
+  --logs '[{"category":"GatewayLogs","enabled":true}]' --metrics '[{"category":"AllMetrics","enabled":true}]'
+```
+
+### Example use case (newbie) / Contoh kasus
+
+> *“Which agent burned the most tokens yesterday, and did anyone hit the limit?”*
+>
+> - **Most tokens** → App Insights (§9 KQL on `customMetrics`, dimension `Agent`). Needs the App
+>   Insights logger (now attached). Or, without any backend, read `data/audit.db` grouped by `actor`.
+> - **Who hit the limit (429)** → the app's **audit log** already has it (the run recorded route + a
+>   failure), or Log Analytics `GatewayLogs | where ResponseCode == 429` if you add the diagnostic.
 
 ---
 
