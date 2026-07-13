@@ -23,6 +23,19 @@ threshold**, **semua kemampuan lain APIM**, plus **diagram high-level dan low-le
 > | v2 path (responses) | `APIM_RESPONSES_PATH` = `/foundry` |
 > | APIM managed-identity principal | `c0ec5fd4-b8c1-4da1-b5ae-ad222930d4ff` |
 
+> **✅ Verified implementation notes (what actually works in this deployment)**
+>
+> - **Both v1 and v2 call the Responses API** (`POST /responses`) on the **same** OpenAI-compatible
+>   Foundry surface `https://bnsfoundryer3wj7.services.ai.azure.com/api/projects/financing/openai/v1`.
+>   v1's `OpenAIChatClient` (Agent Framework) calls `responses.parse` under the hood; v2 calls
+>   `responses.create` with an `agent_reference`. So each APIM API just needs a **`POST /responses`**
+>   operation pointed at that one backend.
+> - **Managed-identity token audience is `https://ai.azure.com`** (not `cognitiveservices.azure.com`).
+> - **`llm-*` policies are used for BOTH** APIs (the surface is OpenAI-compatible, model-agnostic).
+> - **`llm-emit-token-metric` and `llm-token-limit` both live in the `inbound` section.**
+> - This CLI has **no** `az apim backend` / `az apim api policy` groups — we use
+>   `<set-backend-service base-url="…"/>` inline and apply policies via `az rest` (ARM).
+
 ---
 
 ## Contents / Isi
@@ -67,27 +80,28 @@ flowchart LR
     V2 -->|apim: OpenAI base_url=/foundry| APIM
 
     subgraph APIM["🚧 apim-bns-fin-idc01 (Developer · Indonesia Central)"]
-      P1["v1 API /openai<br/>azure-openai-token-limit<br/>azure-openai-emit-token-metric"]
-      P2["v2 API /foundry<br/>llm-token-limit<br/>llm-emit-token-metric"]
-      MI["authentication-managed-identity<br/>resource=cognitiveservices"]
+      P1["v1 API /openai → POST /responses<br/>llm-token-limit (key x-bns-usecase)<br/>llm-emit-token-metric"]
+      P2["v2 API /foundry → POST /responses<br/>llm-token-limit (key x-bns-agent)<br/>llm-emit-token-metric"]
+      MI["authentication-managed-identity<br/>resource=https://ai.azure.com"]
     end
 
-    APIM -->|managed identity| FDN["Microsoft Foundry<br/>bnsfoundryer3wj7 · gpt-4o-mini<br/>(East US 2)"]
+    APIM -->|managed identity| FDN["Microsoft Foundry<br/>bnsfoundryer3wj7 · gpt-4o-mini<br/>/openai/v1 surface (East US 2)"]
     APIM -. token metrics .-> AI["Application Insights /<br/>Azure Monitor (namespace bns-genai)"]
 ```
 
-Key point / Poin kunci: **APIM governs the HTTPS model call, not "the agent."** v1 exposes the
-`chat/completions` shape (one call **per model turn**); v2 exposes the `responses` shape (one call
-**per agent run**, because Foundry runs the tool loop server-side).
+Key point / Poin kunci: **APIM governs the HTTPS model call, not "the agent."** Both v1 and v2 hit the
+**Responses API** (`/responses`) on the same `/openai/v1` surface. The difference is *where the tool
+loop runs*: **v1 loops in-process** (Agent Framework), so APIM sees a call **per agent step**; **v2
+loops server-side** in Foundry, so APIM sees **one call per agent run**.
 
 ---
 
-## 2) Low-level sequence — v1 (chat/completions)
+## 2) Low-level sequence — v1 (Responses API, in-process loop)
 
-**EN:** v1 builds the agent in-process and loops locally. **Each model turn** is a separate
-`chat/completions` POST, so APIM sees fine-grained per-turn traffic and can meter/limit at that
-granularity. **ID:** v1 membangun agen di proses lokal dan me-loop lokal. **Tiap giliran model** =
-satu POST `chat/completions`, jadi APIM melihat trafik per-giliran dan bisa meter/limit sehalus itu.
+**EN:** v1 builds the agent in-process and loops locally. Each agent step is a `responses` POST (the
+Agent Framework `OpenAIChatClient` calls `responses.parse`), so APIM sees per-step traffic and can
+meter/limit at that granularity. **ID:** v1 membangun agen di proses lokal dan me-loop lokal. Tiap
+langkah agen = satu POST `responses`, jadi APIM melihat trafik per-langkah dan bisa meter/limit.
 
 ```mermaid
 sequenceDiagram
@@ -97,19 +111,18 @@ sequenceDiagram
     participant R as AgentRunner (model_client.py)
     participant C as OpenAIChatClient (base_url=/openai)
     participant G as APIM /openai
-    participant F as Foundry gpt-4o-mini
+    participant F as Foundry /openai/v1
 
     U->>W: run_retail(..., via_apim=True)
     W->>R: financing_session(request_id, "retail", via_apim=True)
     Note over R,C: make_chat_client() builds OpenAIChatClient<br/>headers: Ocp-Apim-Subscription-Key,<br/>x-bns-tier=v1, x-bns-usecase=retail
-    loop each agent turn (intake, risk, ...)
-        R->>C: chat.completions.create(messages)
-        C->>G: POST /openai/.../chat/completions
-        Note over G: inbound policy runs:<br/>token-limit (counter-key=x-bns-usecase)<br/>set-backend-service + managed identity
+    loop each agent step (intake, risk, ...)
+        R->>C: agent.run(...) → responses.parse(...)
+        C->>G: POST /openai/responses
+        Note over G: inbound policy runs:<br/>llm-token-limit (counter-key=x-bns-usecase)<br/>set-backend-service + managed identity (ai.azure.com)<br/>llm-emit-token-metric (dims UseCase, Tier)
         alt within budget
             G->>F: forwards with AAD token
-            F-->>G: completion + usage
-            Note over G: outbound: emit-token-metric<br/>(dims UseCase, Tier)
+            F-->>G: response + usage
             G-->>C: 200 + usage + x-tokens-remaining
             C-->>R: message
             R->>R: cost.add(usage) · audit.record(route=apim)
@@ -181,10 +194,12 @@ def apim_base_url(kind: str) -> str:           # kind: "chat" (v1) | "responses"
     return s.apim_gateway_url.rstrip("/") + (suffix or "")
 ```
 
-### v1 — swap the chat client (per model turn)
+### v1 — swap the chat client (per agent step)
 
 [app/agents/shared/model_client.py](../app/agents/shared/model_client.py) — when routing via APIM we
-build an **OpenAI-compatible** client pointed at the gateway instead of `FoundryChatClient`:
+build an **OpenAI-compatible** client pointed at the gateway instead of `FoundryChatClient`. The Agent
+Framework `OpenAIChatClient` calls the **Responses API** (`responses.parse`) under the hood, so this
+lands on the gateway's `POST /responses` operation:
 
 ```python
 def make_chat_client(credential, via_apim=None, use_case=None):
@@ -251,6 +266,8 @@ $RG      = "rg-finance-agenticai"
 $APIM    = "apim-bns-fin-idc01"
 $LOC     = "indonesiacentral"
 $FOUNDRY = "bnsfoundryer3wj7"
+# Both v1 and v2 hit the SAME OpenAI-compatible Responses surface:
+$BASE    = "https://$FOUNDRY.services.ai.azure.com/api/projects/financing/openai/v1"
 
 # 1. Create the gateway (classic Developer, system-assigned identity) — ~30–45 min
 az apim create -n $APIM -g $RG -l $LOC `
@@ -258,52 +275,52 @@ az apim create -n $APIM -g $RG -l $LOC `
   --publisher-email "you@org.com" --publisher-name "BNS Financing" `
   --enable-managed-identity true
 
-# 2. Grant APIM's managed identity data-plane access to Foundry (so it can call the model)
-$MI      = az apim show -n $APIM -g $RG --query identity.principalId -o tsv
-$SCOPE   = az cognitiveservices account show -n $FOUNDRY -g $RG --query id -o tsv
+# 2. Grant APIM's managed identity data-plane access to Foundry
+$MI    = az apim show -n $APIM -g $RG --query identity.principalId -o tsv
+$SCOPE = az cognitiveservices account show -n $FOUNDRY -g $RG --query id -o tsv
 az role assignment create --assignee $MI --role "Cognitive Services User"        --scope $SCOPE
 az role assignment create --assignee $MI --role "Cognitive Services OpenAI User" --scope $SCOPE
 
-# 3. Backend → Foundry OpenAI endpoint
-$FOUNDRY_OPENAI = "https://$FOUNDRY.openai.azure.com"
-az apim backend create -g $RG --service-name $APIM `
-  --backend-id foundry-backend --protocol http `
-  --url "$FOUNDRY_OPENAI/openai"
+# 3. Two APIs, each with a POST /responses operation, both pointed at the SAME /openai/v1 backend.
+#    NOTE: this CLI has no `az apim backend` group — the API service-url IS the backend, and the
+#    policy also sets it inline via <set-backend-service base-url=…/>.
+az apim api create -g $RG --service-name $APIM --api-id bns-v1-openai `
+  --path openai --display-name "BNS v1 (responses)" --service-url $BASE --protocols https --subscription-required true
+az apim api operation create -g $RG --service-name $APIM --api-id bns-v1-openai `
+  --operation-id responses --display-name responses --method POST --url-template "/responses"
 
-# 4a. v1 API — chat/completions surface at path /openai
-#     Import the Azure OpenAI inference OpenAPI, or create the API and add the operation, then
-#     attach the v1 policy in section 6 at the API scope.
-az apim api create -g $RG --service-name $APIM `
-  --api-id bns-v1-openai --path openai --display-name "BNS v1 (chat/completions)" `
-  --service-url "$FOUNDRY_OPENAI/openai" --protocols https
+az apim api create -g $RG --service-name $APIM --api-id bns-v2-foundry `
+  --path foundry --display-name "BNS v2 (responses/agents)" --service-url $BASE --protocols https --subscription-required true
+az apim api operation create -g $RG --service-name $APIM --api-id bns-v2-foundry `
+  --operation-id responses --display-name responses --method POST --url-template "/responses"
 
-# 4b. v2 API — responses/agents surface at path /foundry (passthrough)
-az apim api create -g $RG --service-name $APIM `
-  --api-id bns-v2-foundry --path foundry --display-name "BNS v2 (responses/agents)" `
-  --service-url "$FOUNDRY_OPENAI" --protocols https
+# 4. Attach the policies. This CLI has no `az apim api policy` group — apply via az rest / ARM.
+$sub = az account show --query id -o tsv
+function Set-ApimPolicy($apiId, $xmlPath) {
+  $body = @{ properties = @{ format = "rawxml"; value = (Get-Content $xmlPath -Raw) } } | ConvertTo-Json -Depth 5
+  [IO.File]::WriteAllText("$PWD\_body.json", $body)   # BOM-free (az rest rejects a UTF-8 BOM)
+  $uri = "https://management.azure.com/subscriptions/$sub/resourceGroups/$RG/providers/Microsoft.ApiManagement/service/$APIM/apis/$apiId/policies/policy?api-version=2022-08-01"
+  az rest --method put --uri $uri --body '@_body.json' --headers "Content-Type=application/json" --output-file ./_out.json
+}
+Set-ApimPolicy bns-v1-openai  ./infra/apim/policy-v1.xml   # section 6
+Set-ApimPolicy bns-v2-foundry ./infra/apim/policy-v2.xml   # section 7
 
-# 5. Attach policies (section 6 to bns-v1-openai, section 7 to bns-v2-foundry).
-#    Easiest via portal (APIs → <api> → Design → </> policy editor) or:
-az apim api policy create -g $RG --service-name $APIM --api-id bns-v1-openai `
-  --format xml --value (Get-Content ./policy-v1.xml -Raw)
-az apim api policy create -g $RG --service-name $APIM --api-id bns-v2-foundry `
-  --format xml --value (Get-Content ./policy-v2.xml -Raw)
-
-# 6. Get a subscription key (built-in all-APIs product), then point the portal at APIM
-$KEY = az apim subscription show -g $RG --service-name $APIM --sid master `
-  --query primaryKey -o tsv
+# 5. Get the built-in master subscription key, then point the portal at APIM
+$KEY = az rest --method post --query primaryKey -o tsv --uri `
+  "https://management.azure.com/subscriptions/$sub/resourceGroups/$RG/providers/Microsoft.ApiManagement/service/$APIM/subscriptions/master/listSecrets?api-version=2022-08-01"
 az containerapp update -n ca-bns-portal -g $RG --set-env-vars `
   ROUTE_VIA_APIM="false" `
   APIM_GATEWAY_URL="https://$APIM.azure-api.net" `
   APIM_SUBSCRIPTION_KEY="$KEY" `
   APIM_CHAT_PATH="/openai" `
   APIM_RESPONSES_PATH="/foundry" `
-  APIM_API_VERSION="2024-10-21"
+  APIM_API_VERSION=""
 ```
 
 > `ROUTE_VIA_APIM="false"` keeps direct as the **default**; the per-page toggle opts a single run into
-> APIM. Once the env vars are set, the portal badge shows **🟢 APIM** when the toggle is on. / Toggle
-> per-halaman meng-*opt-in* satu run ke APIM; badge menampilkan **🟢 APIM** saat aktif.
+> APIM. `APIM_API_VERSION` is left **empty** because the `/openai/v1` surface is the OpenAI-style
+> (no `api-version`) API. Once the env vars are set, the portal badge shows **🟢 APIM** when the toggle
+> is on. / Toggle per-halaman meng-*opt-in* satu run ke APIM; `APIM_API_VERSION` dikosongkan.
 
 The config keys read by the app live in [app/core/config.py](../app/core/config.py):
 `ROUTE_VIA_APIM`, `APIM_GATEWAY_URL`, `APIM_SUBSCRIPTION_KEY`, `APIM_CHAT_PATH`,
@@ -311,81 +328,85 @@ The config keys read by the app live in [app/core/config.py](../app/core/config.
 
 ---
 
-## 6) Full policy XML — v1 API (chat/completions)
+## 6) Full policy XML — v1 API (responses)
 
-Attach at the **API scope** of `bns-v1-openai`. Uses the specialized `azure-openai-*` policies (they
-understand the chat/completions request/response shape and count tokens accurately).
+The deployed policy is [infra/apim/policy-v1.xml](../infra/apim/policy-v1.xml), attached at the **API
+scope** of `bns-v1-openai`. Because the backend is the OpenAI-compatible `/openai/v1` surface, we use
+the model-agnostic **`llm-*`** policies. Both the limit **and** the metric policy live in **`inbound`**.
 
 ```xml
 <policies>
   <inbound>
     <base />
-    <!-- Route to Foundry and authenticate with APIM's managed identity -->
-    <set-backend-service backend-id="foundry-backend" />
-    <authentication-managed-identity resource="https://cognitiveservices.azure.com" />
+    <!-- Route to the Foundry OpenAI-compatible (/openai/v1) backend -->
+    <set-backend-service base-url="https://bnsfoundryer3wj7.services.ai.azure.com/api/projects/financing/openai/v1" />
+    <!-- Authenticate to Foundry with APIM's managed identity (audience = ai.azure.com) -->
+    <authentication-managed-identity resource="https://ai.azure.com" />
 
     <!-- Per-use-case token budget: each use-case gets its own bucket (v1 tags x-bns-usecase) -->
-    <azure-openai-token-limit
-        counter-key="@(context.Request.Headers.GetValueOrDefault('x-bns-usecase','unknown'))"
+    <llm-token-limit
+        counter-key="@(context.Request.Headers.GetValueOrDefault(&quot;x-bns-usecase&quot;,&quot;unknown&quot;))"
         tokens-per-minute="6000"
-        estimate-prompt-tokens="true"
-        remaining-tokens-header-name="x-tokens-remaining"
-        tokens-consumed-header-name="x-tokens-consumed" />
+        estimate-prompt-tokens="false"
+        remaining-tokens-header-name="x-tokens-remaining" />
+
+    <!-- Per-use-case token metrics to Azure Monitor (emit policies go in inbound) -->
+    <llm-emit-token-metric namespace="bns-genai">
+      <dimension name="UseCase" value="@(context.Request.Headers.GetValueOrDefault(&quot;x-bns-usecase&quot;,&quot;?&quot;))" />
+      <dimension name="Tier"    value="v1" />
+    </llm-emit-token-metric>
   </inbound>
   <backend><base /></backend>
-  <outbound>
-    <base />
-    <!-- Emit per-use-case token metrics to Azure Monitor / App Insights -->
-    <azure-openai-emit-token-metric namespace="bns-genai">
-      <dimension name="UseCase" value="@(context.Request.Headers.GetValueOrDefault('x-bns-usecase','?'))" />
-      <dimension name="Tier"    value="@(context.Request.Headers.GetValueOrDefault('x-bns-tier','v1'))" />
-      <dimension name="ApiId"   value="@(context.Api.Id)" />
-    </azure-openai-emit-token-metric>
-  </outbound>
+  <outbound><base /></outbound>
   <on-error><base /></on-error>
 </policies>
 ```
+
+> The `&quot;` entities are literal double-quotes inside the policy-expression string arguments — they
+> must be escaped because they sit inside an XML attribute value. / `&quot;` = tanda kutip ganda yang
+> di-escape karena berada di dalam nilai atribut XML.
 
 ---
 
 ## 7) Full policy XML — v2 API (responses)
 
-Attach at the **API scope** of `bns-v2-foundry`. The Responses/agents surface is model-agnostic, so
-use the **`llm-*`** policies (same attributes as the `azure-openai-*` ones, but they parse the generic
-LLM `usage` shape). v2 tags **`x-bns-agent`** per call, so we key on the agent.
+The deployed policy is [infra/apim/policy-v2.xml](../infra/apim/policy-v2.xml), attached at the **API
+scope** of `bns-v2-foundry`. Same backend and auth as v1; the only difference is the **counter-key and
+dimensions are keyed on `x-bns-agent`** (v2 tags the agent per call).
 
 ```xml
 <policies>
   <inbound>
     <base />
-    <set-backend-service backend-id="foundry-backend" />
-    <authentication-managed-identity resource="https://cognitiveservices.azure.com" />
+    <set-backend-service base-url="https://bnsfoundryer3wj7.services.ai.azure.com/api/projects/financing/openai/v1" />
+    <authentication-managed-identity resource="https://ai.azure.com" />
 
     <!-- Per-agent token budget: each agent (magentic-worker, retail-intake, …) its own bucket -->
     <llm-token-limit
-        counter-key="@(context.Request.Headers.GetValueOrDefault('x-bns-agent','unknown'))"
+        counter-key="@(context.Request.Headers.GetValueOrDefault(&quot;x-bns-agent&quot;,&quot;unknown&quot;))"
         tokens-per-minute="8000"
         estimate-prompt-tokens="false"
         remaining-tokens-header-name="x-tokens-remaining" />
-  </inbound>
-  <backend><base /></backend>
-  <outbound>
-    <base />
+
     <!-- Per-agent + per-use-case token metrics -->
     <llm-emit-token-metric namespace="bns-genai">
-      <dimension name="Agent"   value="@(context.Request.Headers.GetValueOrDefault('x-bns-agent','?'))" />
-      <dimension name="UseCase" value="@(context.Request.Headers.GetValueOrDefault('x-bns-usecase','?'))" />
+      <dimension name="Agent"   value="@(context.Request.Headers.GetValueOrDefault(&quot;x-bns-agent&quot;,&quot;?&quot;))" />
+      <dimension name="UseCase" value="@(context.Request.Headers.GetValueOrDefault(&quot;x-bns-usecase&quot;,&quot;?&quot;))" />
       <dimension name="Tier"    value="v2" />
     </llm-emit-token-metric>
-  </outbound>
+  </inbound>
+  <backend><base /></backend>
+  <outbound><base /></outbound>
   <on-error><base /></on-error>
 </policies>
 ```
 
-> **Which policy set?** Use `azure-openai-*` when the traffic is exactly the **Azure OpenAI
-> chat/completions** shape (v1). Use `llm-*` for **any other LLM surface** including the **Responses /
-> agents** shape (v2). Both meter real tokens from the response `usage`. / Pakai `azure-openai-*` untuk
-> bentuk chat/completions (v1), `llm-*` untuk surface LLM lain termasuk Responses (v2).
+> **Which policy set?** In this deployment both surfaces are the **OpenAI-compatible `/openai/v1`**
+> API, so **`llm-*`** policies are used for both. If you instead front the **classic Azure OpenAI**
+> `chat/completions` endpoint (`*.openai.azure.com/openai/deployments/…`), you can use the specialized
+> **`azure-openai-*`** variants (same attributes). Both meter real tokens from the response `usage`.
+> / Di sini keduanya OpenAI-compatible, jadi pakai `llm-*`; untuk endpoint Azure OpenAI klasik bisa
+> pakai `azure-openai-*`.
 
 ---
 
@@ -393,17 +414,18 @@ LLM `usage` shape). v2 tags **`x-bns-agent`** per call, so we key on the agent.
 
 | Policy element | What it does / Fungsinya |
 |---|---|
-| `set-backend-service backend-id` | Points this API at the Foundry backend created in setup step 3. |
-| `authentication-managed-identity resource=…cognitiveservices…` | APIM fetches an AAD token for its **managed identity** and attaches it to the backend call — **no key** to Foundry. |
-| `azure-openai-token-limit` / `llm-token-limit` | **The throttle.** Counts tokens per `counter-key` bucket; over `tokens-per-minute` → **HTTP 429**. `estimate-prompt-tokens="true"` counts the prompt *before* calling the model (protects the backend). |
-| `counter-key=…GetValueOrDefault('x-bns-agent'…)` | The **bucket selector**. Because we key on our own header, one model deployment is split into **per-agent** (or per-use-case) budgets. |
+| `set-backend-service base-url` | Points this API at the Foundry `/openai/v1` backend (inline, no separate backend entity needed). |
+| `authentication-managed-identity resource="https://ai.azure.com"` | APIM fetches an AAD token for its **managed identity** (audience `ai.azure.com`) and puts it in the `Authorization` header of the backend call — **no key** to Foundry. |
+| `llm-token-limit` | **The throttle.** Counts tokens per `counter-key` bucket; over `tokens-per-minute` → **HTTP 429**. `estimate-prompt-tokens="true"` counts the prompt *before* calling the model (protects the backend). |
+| `counter-key=…GetValueOrDefault("x-bns-agent"…)` | The **bucket selector**. Because we key on our own header, one model deployment is split into **per-agent** (or per-use-case) budgets. |
 | `remaining-tokens-header-name` | APIM returns how many tokens are left this minute — handy to display or log. |
-| `azure-openai-emit-token-metric` / `llm-emit-token-metric` | **The meter.** Emits a `Total/Prompt/Completion Tokens` custom metric to Azure Monitor with your `<dimension>`s (Agent, UseCase, Tier) so you can slice usage without touching the app. |
+| `llm-emit-token-metric` | **The meter.** Emits `Total/Prompt/Completion Tokens` custom metrics to Azure Monitor with your `<dimension>`s (Agent, UseCase, Tier) so you can slice usage without touching the app. |
 | `namespace="bns-genai"` | The metric namespace you'll query in App Insights `customMetrics`. |
 
-**Order matters:** limit policies live **inbound** (reject early, before hitting the model); metric
-policies live **outbound** (the real `usage` is only known after the response). / **Urutan penting:**
-limit di **inbound** (tolak lebih awal), metric di **outbound** (usage baru diketahui setelah respons).
+**Section placement:** both `llm-token-limit` **and** `llm-emit-token-metric` live in the **`inbound`**
+section (APIM hooks the response automatically to read `usage`). Putting `llm-emit-token-metric` in
+`outbound` fails validation ("Policy is not allowed in this section"). / **Penempatan:** `llm-token-limit`
+dan `llm-emit-token-metric` keduanya di **`inbound`**; menaruh emit di `outbound` gagal validasi.
 
 ---
 
@@ -436,14 +458,14 @@ Retail is high-volume/low-value; SME underwriting is low-volume/high-value. Diff
 
 ```xml
 <choose>
-  <when condition="@(context.Request.Headers.GetValueOrDefault('x-bns-usecase','')=='retail')">
-    <azure-openai-token-limit counter-key="uc-retail" tokens-per-minute="10000" estimate-prompt-tokens="true" />
+  <when condition="@(context.Request.Headers.GetValueOrDefault(&quot;x-bns-usecase&quot;,&quot;&quot;)==&quot;retail&quot;)">
+    <llm-token-limit counter-key="uc-retail" tokens-per-minute="10000" estimate-prompt-tokens="false" />
   </when>
-  <when condition="@(context.Request.Headers.GetValueOrDefault('x-bns-usecase','')=='sme')">
-    <azure-openai-token-limit counter-key="uc-sme" tokens-per-minute="3000" estimate-prompt-tokens="true" />
+  <when condition="@(context.Request.Headers.GetValueOrDefault(&quot;x-bns-usecase&quot;,&quot;&quot;)==&quot;sme&quot;)">
+    <llm-token-limit counter-key="uc-sme" tokens-per-minute="3000" estimate-prompt-tokens="false" />
   </when>
   <otherwise>
-    <azure-openai-token-limit counter-key="uc-default" tokens-per-minute="5000" estimate-prompt-tokens="true" />
+    <llm-token-limit counter-key="uc-default" tokens-per-minute="5000" estimate-prompt-tokens="false" />
   </otherwise>
 </choose>
 ```
@@ -512,9 +534,10 @@ Confirm the audit row shows `route:apim` and the tech log entries carry `"route"
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | Toggle stays **⚪ Direct** even when on | `APIM_GATEWAY_URL` or `APIM_SUBSCRIPTION_KEY` unset → `apim_configured()` false | set both env vars on `ca-bns-portal`. |
-| **401** from APIM | wrong/missing subscription key | use the product/subscription key (`Ocp-Apim-Subscription-Key`). |
-| **401/403** from the backend | APIM identity lacks Foundry role | assign *Cognitive Services User* + *OpenAI User* to the APIM MI. |
-| **404** at the gateway | path mismatch | `APIM_CHAT_PATH` / `APIM_RESPONSES_PATH` must equal the API `path`. |
+| **401** from APIM | wrong/missing subscription key | send `Ocp-Apim-Subscription-Key` (the master/product key). |
+| **401** from the backend (`audience is incorrect (https://ai.azure.com)`) | wrong managed-identity audience | set `authentication-managed-identity resource="https://ai.azure.com"`. |
+| **403** from the backend | APIM identity lacks a Foundry role | assign *Cognitive Services User* + *OpenAI User* to the APIM MI. |
+| **404** `{"statusCode":404,"message":"Resource not found"}` at the gateway | no APIM operation matched the path | the client posts to `/responses` — add a `POST /responses` operation (both v1 & v2). |
 | **429** immediately | `tokens-per-minute` too low for that bucket | raise the limit or widen the counter-key. |
 | No metrics in App Insights | metric policy missing / wrong namespace | ensure `emit-token-metric` in **outbound** and query `customMetrics` namespace `bns-genai`. |
 | Extra ~250 ms/call | model in East US 2, APIM in Jakarta | expected; co-locate for prod. |

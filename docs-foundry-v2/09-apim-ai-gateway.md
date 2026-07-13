@@ -26,7 +26,7 @@ memanggil model; APIM berada di jalur itu untuk menghitung token, membatasi (429
 ```mermaid
 flowchart LR
     subgraph v1["v1 (in-code)"]
-      A1[AgentRunner loop] -->|chat/completions| T
+      A1[AgentRunner loop] -->|responses.parse| T
     end
     subgraph v2["v2 (Foundry)"]
       A2[code] -->|responses.create| T
@@ -38,8 +38,8 @@ flowchart LR
 
 | | v1 (in-code) | v2 (Foundry) |
 |---|---|---|
-| Surface APIM sees | **chat/completions** (per model turn) | **responses/agents** (per agent run) |
-| Granularity | fine (per turn) | coarse (per run) |
+| Surface APIM sees | **/responses** (per agent step) | **/responses** (per agent run) |
+| Granularity | fine (per step) | coarse (per run) |
 | Code hook | `OpenAIChatClient(base_url=APIM/openai)` | `openai.OpenAI(base_url=APIM/foundry)` |
 
 ---
@@ -131,9 +131,11 @@ Different limit for a specific agent / Batas berbeda untuk agen tertentu:
 Over-limit → **HTTP 429** for that agent only; others unaffected. / Melebihi batas → **429** hanya untuk
 agen itu; agen lain tidak terpengaruh.
 
-> **Surface note:** the specialized `azure-openai-*` policies target the **chat/completions** shape
-> (v1). For the **v2** Responses/agents surface, use the model-agnostic **`llm-token-limit` /
-> `llm-emit-token-metric`** equivalents (same attributes) or a small custom policy that reads `usage`.
+> **Surface note:** in this deployment **both** v1 and v2 call the **Responses API** (`/responses`) on
+> the OpenAI-compatible `/openai/v1` Foundry surface, so the model-agnostic **`llm-token-limit` /
+> `llm-emit-token-metric`** policies are used for **both**. (If you front the classic Azure OpenAI
+> `chat/completions` endpoint instead, the `azure-openai-*` variants apply.) See
+> [10-apim-implementation-reference.md](10-apim-implementation-reference.md) for the full policy XML.
 
 ---
 
@@ -179,8 +181,8 @@ az role assignment create --assignee $mi --role "Cognitive Services OpenAI User"
 
 # 3. Backend → Foundry, then two APIs (chat-completions for v1, responses for v2) with policies above.
 #    Backend policy authenticates with the managed identity:
-#      <set-backend-service backend-id="foundry-backend" />
-#      <authentication-managed-identity resource="https://cognitiveservices.azure.com" />
+#      <set-backend-service base-url="https://<foundry>.services.ai.azure.com/api/projects/<proj>/openai/v1" />
+#      <authentication-managed-identity resource="https://ai.azure.com" />
 
 # 4. Create a subscription key, then point the portal at APIM:
 az containerapp update -n ca-bns-portal -g rg-finance-agenticai --set-env-vars `

@@ -1,0 +1,25 @@
+<policies>
+    <inbound>
+        <base />
+        <!-- Route to the Foundry OpenAI-compatible (/openai/v1) backend -->
+        <set-backend-service base-url="https://bnsfoundryer3wj7.services.ai.azure.com/api/projects/financing/openai/v1" />
+        <!-- Authenticate to Foundry with APIM's managed identity (overwrites the incoming Authorization) -->
+        <authentication-managed-identity resource="https://ai.azure.com" />
+        <!-- Per-use-case token budget (v1 tags x-bns-usecase). Over budget -> HTTP 429. -->
+        <llm-token-limit counter-key="@(context.Request.Headers.GetValueOrDefault(&quot;x-bns-usecase&quot;,&quot;unknown&quot;))" tokens-per-minute="6000" estimate-prompt-tokens="false" remaining-tokens-header-name="x-tokens-remaining" />
+        <!-- Per-use-case token metrics to Azure Monitor (namespace bns-genai). Emit policies live in inbound. -->
+        <llm-emit-token-metric namespace="bns-genai">
+            <dimension name="UseCase" value="@(context.Request.Headers.GetValueOrDefault(&quot;x-bns-usecase&quot;,&quot;?&quot;))" />
+            <dimension name="Tier" value="v1" />
+        </llm-emit-token-metric>
+    </inbound>
+    <backend>
+        <base />
+    </backend>
+    <outbound>
+        <base />
+    </outbound>
+    <on-error>
+        <base />
+    </on-error>
+</policies>
