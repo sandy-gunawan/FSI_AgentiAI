@@ -19,7 +19,9 @@ from pydantic import BaseModel
 
 from agent_framework import Agent, function_middleware
 from agent_framework.foundry import FoundryChatClient
+from agent_framework.openai import OpenAIChatClient
 
+from app.agents.shared.gateway import apim_base_url, apim_headers, route_label, use_apim
 from app.core.config import get_settings
 from app.governance.audit_log import get_audit_logger
 from app.governance.content_safety import redact_pii
@@ -105,11 +107,12 @@ class AgentRunner:
     """Runs Agent Framework agents with governance hooks attached."""
 
     def __init__(self, client: FoundryChatClient, request_id: str, use_case: str,
-                 cost: CostTracker) -> None:
+                 cost: CostTracker, route: str = "direct") -> None:
         self.client = client
         self.request_id = request_id
         self.use_case = use_case
         self.cost = cost
+        self.route = route
         self.audit = get_audit_logger()
         self.tech: list[dict] = []  # real tool/MCP call log
 
@@ -139,7 +142,7 @@ class AgentRunner:
         self.cost.add(in_tok, out_tok)
         self.tech.append({
             "tool": "model:usage",
-            "args": _trim({"step": step, "actor": name}),
+            "args": _trim({"step": step, "actor": name, "route": self.route}),
             "result": _trim(_usage_snapshot(usage), n=500),
             "ms": 0.0,
         })
@@ -156,8 +159,18 @@ class AgentRunner:
         return result.value if response_format else result.text
 
 
-def make_chat_client(credential: DefaultAzureCredential) -> FoundryChatClient:
+def make_chat_client(credential: DefaultAzureCredential, via_apim: bool | None = None):
+    """Build the chat client for one request: direct FoundryChatClient, or an
+    OpenAI-compatible client pointed at the APIM gateway when routing via APIM."""
     s = get_settings()
+    if use_apim(via_apim):
+        return OpenAIChatClient(
+            model=s.foundry_model,
+            base_url=apim_base_url("chat"),
+            api_key=s.apim_subscription_key,       # APIM validates via subscription key header
+            api_version=s.apim_api_version or None,
+            default_headers=apim_headers(),
+        )
     return FoundryChatClient(
         project_endpoint=s.foundry_project_endpoint,
         model=s.foundry_model,
@@ -166,10 +179,17 @@ def make_chat_client(credential: DefaultAzureCredential) -> FoundryChatClient:
 
 
 @asynccontextmanager
-async def financing_session(request_id: str, use_case: str):
-    """Own the credential + chat client + cost tracker for one request."""
+async def financing_session(request_id: str, use_case: str, via_apim: bool | None = None):
+    """Own the credential + chat client + cost tracker for one request.
+
+    ``via_apim`` is the per-request routing override from the portal toggle; falls back
+    to the direct path when APIM is not configured (see app/agents/shared/gateway.py).
+    """
     cost = CostTracker(request_id)
+    route = route_label(via_apim)
     async with DefaultAzureCredential() as credential:
-        client = make_chat_client(credential)
-        runner = AgentRunner(client, request_id, use_case, cost)
+        client = make_chat_client(credential, via_apim)
+        runner = AgentRunner(client, request_id, use_case, cost, route=route)
+        get_audit_logger().record(request_id, use_case, "gateway", f"route:{route}",
+                                  f"Routing agen v1 via {route.upper()}", decision=route.upper())
         yield runner, cost

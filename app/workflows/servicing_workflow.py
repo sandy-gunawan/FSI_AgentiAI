@@ -40,7 +40,7 @@ _HANDLERS = {
 
 
 async def run_servicing(
-    request: ServiceRequest, request_id: str, on_event=None
+    request: ServiceRequest, request_id: str, on_event=None, via_apim: bool | None = None
 ) -> tuple[ServiceResolution, RoutingDecision, dict]:
     """Route one customer message to the right handler and resolve it."""
     audit = get_audit_logger()
@@ -57,7 +57,7 @@ async def run_servicing(
     audit.record(request_id, "servicing", "content_safety", "governance",
                  f"safe={safety['safe']} provider={safety['provider']} categories={safety['categories']}")
 
-    async with financing_session(request_id, "servicing") as (runner, cost):
+    async with financing_session(request_id, "servicing", via_apim) as (runner, cost):
         # ---- Stage 1: Router classifies the intent ----
         _emit("router", "active",
               f"🧭 **Router** aktif · mengklasifikasikan pesan nasabah menjadi 1 intent. "

@@ -69,7 +69,7 @@ async def _run_worker(runner, step: LedgerStep, subject_id: str, nik: str, objec
 
 
 async def run_magentic(
-    request: MagenticRequest, request_id: str, on_event=None
+    request: MagenticRequest, request_id: str, on_event=None, via_apim: bool | None = None
 ) -> tuple[MagenticDossier, dict]:
     """Manager-coordinated, ledger-driven investigation with bounded replanning."""
     audit = get_audit_logger()
@@ -90,7 +90,7 @@ async def run_magentic(
     nik = cust["nik"]
     valid = set(_WORKER_NODE.keys())
 
-    async with financing_session(request_id, "magentic") as (runner, cost):
+    async with financing_session(request_id, "magentic", via_apim) as (runner, cost):
         # ---- Manager: build the task ledger (plan) ----
         _emit("manager", "active",
               f"🧠 **Manager (Magentic)** menyusun *task ledger* untuk: {request.objective[:110]}")

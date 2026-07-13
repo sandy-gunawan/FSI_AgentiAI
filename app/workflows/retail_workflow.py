@@ -40,7 +40,7 @@ PRODUCT_CODE = "KTA-STD"
 
 
 async def run_retail(application: RetailLoanApplication, request_id: str,
-                     on_event=None) -> tuple[RetailDecision, dict]:
+                     on_event=None, via_apim: bool | None = None) -> tuple[RetailDecision, dict]:
     audit = get_audit_logger()
 
     def _emit(node: str, state: str, detail: str = "") -> None:
@@ -69,7 +69,7 @@ async def run_retail(application: RetailLoanApplication, request_id: str,
     dbr = debt_burden_ratio(cust["monthly_income_idr"],
                             credit.get("monthly_debt_obligations_idr", 0), installment)
 
-    async with financing_session(request_id, "retail") as (runner, cost):
+    async with financing_session(request_id, "retail", via_apim) as (runner, cost):
         # ---- Stage 1: Intake & verification (KYC MCP + core banking REST) ----
         _emit("intake", "active",
               f"🧾 **Intake & Verifikasi** aktif · Tool: KYC/AML MCP `screen_individual` + "

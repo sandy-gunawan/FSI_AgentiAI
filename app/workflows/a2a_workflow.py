@@ -33,7 +33,7 @@ def _rp(x) -> str:
 
 
 async def run_syndication(
-    request: SyndicationRequest, request_id: str, on_event=None
+    request: SyndicationRequest, request_id: str, on_event=None, via_apim: bool | None = None
 ) -> tuple[SyndicationResult, dict, dict]:
     """Arrange a syndication by delegating co-underwriting to a partner bank over A2A."""
     settings = get_settings()
@@ -69,7 +69,7 @@ async def run_syndication(
     bns_hold = min(request.requested_amount_idr, cap)
     syndicate_target = max(0, request.requested_amount_idr - bns_hold)
 
-    async with financing_session(request_id, "syndication") as (runner, cost):
+    async with financing_session(request_id, "syndication", via_apim) as (runner, cost):
         # ---- Stage 1: Lead Arranger structures the syndication ----
         _emit("arranger", "active",
               f"🏛️ **Lead Arranger (BNS)** aktif · fasilitas {_rp(request.requested_amount_idr)} > "

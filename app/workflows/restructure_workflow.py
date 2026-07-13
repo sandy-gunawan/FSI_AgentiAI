@@ -40,7 +40,7 @@ def _rp(x) -> str:
 
 
 async def run_restructure(
-    request: RestructureRequest, request_id: str, on_event=None
+    request: RestructureRequest, request_id: str, on_event=None, via_apim: bool | None = None
 ) -> tuple[RestructureOutcome, dict]:
     """Iteratively propose → evaluate a restructuring scheme until affordable."""
     audit = get_audit_logger()
@@ -70,7 +70,7 @@ async def run_restructure(
     critique: ProposalCritique | None = None
     iterations = 0
 
-    async with financing_session(request_id, "restructure") as (runner, cost):
+    async with financing_session(request_id, "restructure", via_apim) as (runner, cost):
         for i in range(1, MAX_ITERS + 1):
             iterations = i
             # ---- Proposer (optimizer) ----

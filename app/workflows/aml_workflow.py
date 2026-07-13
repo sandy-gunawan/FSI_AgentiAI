@@ -34,7 +34,7 @@ from app.workflows.case_store import get_case_store
 
 
 async def run_aml_investigation(
-    request: AmlInvestigationRequest, request_id: str, on_event=None
+    request: AmlInvestigationRequest, request_id: str, on_event=None, via_apim: bool | None = None
 ) -> tuple[SARRecommendation, dict]:
     """Phase A — autonomous ReAct investigation. Persists a PENDING case."""
     audit = get_audit_logger()
@@ -57,7 +57,7 @@ async def run_aml_investigation(
     kyc = sor.kyc_individual(nik)
     sanctioned = bool(kyc.get("dttot_sanctions_hit", False))
 
-    async with financing_session(request_id, "aml") as (runner, cost):
+    async with financing_session(request_id, "aml", via_apim) as (runner, cost):
         _emit("investigator", "active",
               f"🕵️ **Investigator (ReAct)** aktif · memilih tool secara dinamis: KYC/AML MCP "
               f"`screen_individual`, Transaction Monitoring `get_monitoring_alerts`, Core Banking "
@@ -110,7 +110,7 @@ async def run_aml_investigation(
 
 
 async def resume_aml_with_decision(
-    request_id: str, decision: SARDecision, on_event=None
+    request_id: str, decision: SARDecision, on_event=None, via_apim: bool | None = None
 ) -> tuple[SARFiling | None, dict]:
     """Phase B — apply the human analyst's decision and issue the SAR filing."""
     store = get_case_store()
@@ -138,7 +138,7 @@ async def resume_aml_with_decision(
     filed = decision.action == "file"
     final = Decision.APPROVE if filed else Decision.DECLINE
 
-    async with financing_session(request_id, "aml") as (runner, cost):
+    async with financing_session(request_id, "aml", via_apim) as (runner, cost):
         _emit("filing", "active",
               f"📄 **Pelaporan SAR** aktif · menyusun {'laporan SAR/LTKM' if filed else 'penutupan kasus'} "
               f"untuk {request.subject_name}.")

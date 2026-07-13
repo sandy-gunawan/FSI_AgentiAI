@@ -44,7 +44,7 @@ def _rp(x) -> str:
 
 
 async def run_committee(
-    request: CommitteeRequest, request_id: str, on_event=None
+    request: CommitteeRequest, request_id: str, on_event=None, via_apim: bool | None = None
 ) -> tuple[CommitteeDecision, dict]:
     """Run a moderated committee debate (group chat) over a borderline case."""
     audit = get_audit_logger()
@@ -96,7 +96,7 @@ async def run_committee(
 
     transcript: list[CommitteeTurn] = []
 
-    async with financing_session(request_id, "committee") as (runner, cost):
+    async with financing_session(request_id, "committee", via_apim) as (runner, cost):
         _emit("chair", "active",
               f"⚖️ **Chair** membuka komite · menyusun ringkasan kasus & memimpin debat "
               f"{ROUNDS} ronde. Pra-skrining: {pol['decision']}.")

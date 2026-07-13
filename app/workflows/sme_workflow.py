@@ -55,7 +55,7 @@ FACILITY = "Kredit Investasi UKM (SME-TERM)"
 
 
 async def run_sme_analysis(
-    request: SMEFinancingRequest, request_id: str, on_event=None
+    request: SMEFinancingRequest, request_id: str, on_event=None, via_apim: bool | None = None
 ) -> tuple[UnderwritingRecommendation, dict]:
     """Phase A — concurrent specialist analysis + aggregation. Persists PENDING case."""
     audit = get_audit_logger()
@@ -90,7 +90,7 @@ async def run_sme_analysis(
     dte = ratios.get("debt_to_equity", 9.9)
     years_operating = max(0, __import__("datetime").date.today().year - company.get("established_year", 2020))
 
-    async with financing_session(request_id, "sme") as (runner, cost):
+    async with financing_session(request_id, "sme", via_apim) as (runner, cost):
         # ---- Concurrent fan-out to four specialists (the "star") ----
         _emit("orchestrator", "active",
               f"🧭 **Orchestrator** aktif · menyebar tugas ke 4 agen spesialis (PARALEL). "
@@ -214,7 +214,7 @@ async def run_sme_analysis(
 
 
 async def resume_sme_with_decision(
-    request_id: str, human: HumanDecision, on_event=None
+    request_id: str, human: HumanDecision, on_event=None, via_apim: bool | None = None
 ) -> tuple[SMETermSheet | None, dict]:
     """Phase B — apply the human loan officer's decision and issue a term sheet."""
     store = get_case_store()
@@ -244,7 +244,7 @@ async def resume_sme_with_decision(
     amount = human.adjusted_amount_idr or rec.recommended_amount_idr
     rate = human.adjusted_rate_pct or rec.recommended_rate_pct
 
-    async with financing_session(request_id, "sme") as (runner, cost):
+    async with financing_session(request_id, "sme", via_apim) as (runner, cost):
         _emit("termsheet", "active",
               f"📄 **Term Sheet** aktif · menyusun term sheet ({human.action}) untuk {request.legal_name}.")
         summary = await runner.run(
