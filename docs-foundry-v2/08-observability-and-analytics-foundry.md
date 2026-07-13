@@ -14,6 +14,11 @@ view of the **hosted agent runs** (each `agent_reference` call, its tool calls, 
 Lapisan A = sudut pandang aplikasi; Lapisan B = sudut pandang Foundry atas **jalannya agen hosted**
 (tiap panggilan agen, tool-nya, token-nya).
 
+> 🚧 **Optional Layer C — Gateway metrics:** when a run is routed through the **APIM AI Gateway**, its
+> `emit-token-metric` policy also publishes per-agent / per-use-case **token custom-metrics** to Azure
+> Monitor (namespace `bns-genai`). See [10-apim-implementation-reference.md](10-apim-implementation-reference.md)
+> §8–§9 for the KQL. / Lapisan C opsional: metrik token dari policy APIM — lihat dok 10.
+
 ---
 
 ## Layer A — App → Application Insights (unchanged) / Lapisan A (tetap)

@@ -9,6 +9,11 @@ Dokumen ini menjelaskan **AI Gateway (APIM)** yang dipasang **opsional** di depa
 **mengontrol** (batas token) dan **melihat** (metrik token) pemakaian secara terpusat, dan bisa
 **di-toggle per transaksi** dari portal. Berlaku untuk agen **v1 (di kode)** maupun **v2 (Foundry)**.
 
+> 🔧 **Want the hands-on details?** See the **implementation reference**
+> [10-apim-implementation-reference.md](10-apim-implementation-reference.md) — full setup CLI, the exact
+> code hooks, complete policy XML for v1 & v2, sample thresholds, a capability catalogue, and
+> high-level + low-level diagrams. / **Butuh detail praktik?** Lihat dok 10.
+
 ---
 
 ## 1) The core idea — a toll booth on the model call / Ide inti — gerbang tol di panggilan model

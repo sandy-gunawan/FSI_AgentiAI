@@ -4,6 +4,10 @@
 > It shows how to deploy/update this exact project to Azure Container Apps,
 > how to set the key environment variables, and how to verify all live URLs.
 
+> 🚧 **Optional AI Gateway:** after the app is deployed you can add an **APIM AI Gateway** and set the
+> `APIM_*` env vars on the portal to enable the per-transaction **Route via APIM** toggle (per-agent
+> token metrics + limits, v1 & v2). Full setup: [../docs-foundry-v2/10-apim-implementation-reference.md](../docs-foundry-v2/10-apim-implementation-reference.md) §5.
+
 ---
 
 ## 0) What will be deployed

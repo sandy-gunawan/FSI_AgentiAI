@@ -9,6 +9,11 @@ the **two extra things** v2 needs on top of the normal deploy:
 
 Everything else (building images, updating Container Apps) is the same as v1.
 
+> 🚧 **Optional AI Gateway:** to route model calls through **Azure API Management** (per-transaction
+> toggle, per-agent token metrics + limits), provision APIM and set the `APIM_*` env vars on
+> `ca-bns-portal` as described in [10-apim-implementation-reference.md](10-apim-implementation-reference.md)
+> (§5 setup). It is **additive** — direct stays the default. / AI Gateway opsional: lihat dok 10 §5.
+
 ---
 
 ## 0 · Prerequisites

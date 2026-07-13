@@ -9,6 +9,11 @@ how the **Microsoft Agent Framework** is called, how each use case is **orchestr
 > use case is **called in Microsoft Foundry** (agents provisioned as prompt agents and invoked by
 > reference), while keeping the same orchestration and governance described here.
 
+> 🚧 **Optional APIM AI Gateway (v1 + v2):** a per-transaction **Route via APIM** toggle can send any
+> run's model call through **Azure API Management** for central per-agent token **metrics + limits**.
+> It is additive (direct stays the default). Concept: [../docs-foundry-v2/09-apim-ai-gateway.md](../docs-foundry-v2/09-apim-ai-gateway.md);
+> implementation reference: [../docs-foundry-v2/10-apim-implementation-reference.md](../docs-foundry-v2/10-apim-implementation-reference.md).
+
 Read in this order:
 
 | # | Doc | What it answers |

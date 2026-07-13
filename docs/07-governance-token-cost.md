@@ -16,6 +16,11 @@ Dokumen ini menjelaskan detail teknis governance dan metrik:
 - Cara mengambil angka per request dan agregat
 - Mana angka real dan mana estimasi
 
+> 🚧 **Central control beyond the app:** the audit/cost/tech logs here are the auditable business
+> record. For **central, cross-app token metrics + hard per-agent limits** via the optional **APIM AI
+> Gateway** (works for both v1 and v2), see [../docs-foundry-v2/09-apim-ai-gateway.md](../docs-foundry-v2/09-apim-ai-gateway.md)
+> and [../docs-foundry-v2/10-apim-implementation-reference.md](../docs-foundry-v2/10-apim-implementation-reference.md).
+
 ---
 
 ## 1) Governance Building Blocks

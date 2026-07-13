@@ -10,6 +10,12 @@ counted for that agent invocation. **ID:** Di v1 token berasal dari usage Agent 
 dari **`response.usage`** panggilan **Responses API** Foundry — yaitu token **nyata** yang dihitung
 Foundry untuk pemanggilan agen tersebut.
 
+> 🚧 **Central control on top of this:** the app-side governance below is the auditable business
+> record; for **central, cross-app token metrics + hard per-agent limits** via the optional **APIM AI
+> Gateway**, see [09-apim-ai-gateway.md](09-apim-ai-gateway.md) and
+> [10-apim-implementation-reference.md](10-apim-implementation-reference.md). / Untuk kontrol terpusat
+> (metrik + limit per agen) lewat APIM, lihat dok 09 & 10.
+
 ---
 
 ## The three governance objects (unchanged) / Tiga objek governance (tetap)
