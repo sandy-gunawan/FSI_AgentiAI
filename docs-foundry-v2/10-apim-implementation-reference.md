@@ -703,6 +703,61 @@ ApiManagementGatewayLogs
 > `actor`, `tokens`, `decision`) — the threshold and per-agent totals never *require* App Insights.
 > / Semua query punya padanan di `data/audit.db`; threshold & total per-agen tak wajib App Insights.
 
+### C. Direct vs APIM — see the difference side by side
+
+**EN:** Every run is tagged with its **route** (`direct` or `apim`), so you can compare the two paths
+directly. The trick: a **direct** call never touches APIM, so it has an **app record but no gateway
+metric** — that *absence* is the signal. **ID:** Tiap run ditandai `direct`/`apim`; panggilan `direct`
+tak lewat APIM jadi tak punya metrik gateway — ketiadaannya itulah sinyalnya.
+
+**C1 — App-side, instant (no backend needed): count runs per route** — SQL on `data/audit.db`:
+```sql
+-- how many runs went direct vs through APIM
+SELECT decision AS route, COUNT(*) AS runs
+FROM audit_events WHERE step = 'gateway' GROUP BY decision;
+-- example real output: APIM = 5, DIRECT = 24
+```
+
+**C2 — App-side: tokens per request, tagged by route** — `data/audit.db`:
+```sql
+WITH g AS (SELECT request_id, decision AS route FROM audit_events WHERE step = 'gateway')
+SELECT g.route, a.use_case, SUM(a.tokens) AS tokens
+FROM audit_events a JOIN g ON a.request_id = g.request_id
+GROUP BY a.request_id ORDER BY MIN(a.ts) DESC LIMIT 20;
+```
+
+**C3 — Gateway-side (App Insights): only APIM runs appear here** — KQL:
+```kusto
+customMetrics
+| where timestamp > ago(1h) and name == "Total Tokens"
+| extend Tier = tostring(customDimensions.Tier), UseCase = tostring(customDimensions.UseCase)
+| summarize GatewayTokens = sum(valueSum), Calls = sum(valueCount) by Tier, UseCase
+```
+> If a run shows in the **audit log** (`route:apim`) **and** here in `customMetrics`, it truly went
+> through the gateway. If it's only in the audit log, it went **direct**. / Ada di audit *dan* di
+> `customMetrics` = lewat gateway; hanya di audit = direct.
+
+**C4 — Latency difference (the real cost of the extra hop)** — KQL on `requests`:
+```kusto
+requests
+| where timestamp > ago(1d) and tostring(customDimensions["API Name"]) != ""
+| summarize apim_p95_ms = round(percentile(duration, 95), 0), Calls = count()
+// compare against a direct run's wall-time from the app's technical log (tech_log `ms`)
+```
+
+**Example use cases / Contoh kasus:**
+
+| Question | Where to look |
+|---|---|
+| *"Are my runs actually going through APIM, or silently falling back to direct?"* | **C1** — if `APIM` count is 0 while the toggle is on, the `APIM_*` env vars aren't set (graceful fallback). |
+| *"Did routing via APIM change my token counts?"* | **C2** vs **C3** — the app-measured tokens (C2, `route:apim`) should match the gateway-measured tokens (C3) for the same run; a mismatch means a ret/streaming edge case. |
+| *"How much latency does the Jakarta→East US 2 hop add?"* | **C4** — compare APIM `p95` against the direct run's `ms` in the app tech log (expect ~+250 ms). |
+| *"Prove to auditors which requests used the governed gateway."* | **C1/C2** give the auditable business record (`data/audit.db`); **C3** is the independent gateway confirmation. |
+
+> **Note on timing:** the app record (C1/C2) is **instant**; the gateway metric (C3/C4) has a **1–3 min
+> ingestion delay** and only exists for calls made **after** the App Insights logger was attached.
+> / Catatan waktu: catatan app instan; metrik gateway telat 1–3 menit & hanya untuk call setelah logger dipasang.
+
 ---
 
 ## 9) Sample threshold use cases
