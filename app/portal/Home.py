@@ -29,7 +29,19 @@ syndication = st.Page("views/9_Syndication_A2A.py", title="Sindikasi — A2A (Ag
 audit = st.Page("views/3_Audit_Governance.py", title="Audit & Governance", icon="🛡️")
 faq = st.Page("views/10_FAQ.py", title="FAQ & Referensi", icon="📖")
 
-sme_foundry = st.Page("views/11_SME_on_Foundry.py", title="UKM — Agen di Foundry (v2)", icon="🟣")
+# ---- v2: same use cases, but agents are hosted in Microsoft Foundry ---------- #
+retail_foundry = st.Page("views/12_Retail_on_Foundry.py", title="Kredit Ritel — Foundry (v2)", icon="👤")
+sme_foundry = st.Page("views/11_SME_on_Foundry.py", title="UKM — Foundry (v2)", icon="🏢")
+servicing_foundry = st.Page("views/13_Servicing_on_Foundry.py", title="Layanan Nasabah — Foundry (v2)", icon="🎧")
+restructure_foundry = st.Page("views/14_Restructuring_on_Foundry.py",
+                              title="Restrukturisasi — Foundry (v2)", icon="♻️")
+aml_foundry = st.Page("views/15_AML_on_Foundry.py", title="Investigasi AML — Foundry (v2)", icon="🕵️")
+committee_foundry = st.Page("views/16_Credit_Committee_on_Foundry.py",
+                            title="Komite Kredit — Foundry (v2)", icon="⚖️")
+magentic_foundry = st.Page("views/17_Complex_Investigation_on_Foundry.py",
+                           title="Investigasi Kompleks — Foundry (v2)", icon="🧠")
+syndication_foundry = st.Page("views/18_Syndication_on_Foundry.py",
+                              title="Sindikasi A2A — Foundry (v2)", icon="🔗")
 
 pg = st.navigation(
     {
@@ -37,8 +49,9 @@ pg = st.navigation(
         "🧭 Orkestrasi — Dasar": [retail, sme, servicing],
         "🧠 Orkestrasi — Lanjutan": [restructure, aml, committee, magentic],
         "🔗 Interoperabilitas (A2A)": [syndication],
-        "� Hosted di Foundry (v2)": [sme_foundry],
-        "�🛡️ Governance": [audit],
+        "🟣 Hosted di Foundry (v2)": [retail_foundry, sme_foundry, servicing_foundry, restructure_foundry,
+                                      aml_foundry, committee_foundry, magentic_foundry, syndication_foundry],
+        "🛡️ Governance": [audit],
         "📖 Belajar": [faq],
     }
 )
