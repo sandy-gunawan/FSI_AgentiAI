@@ -23,7 +23,7 @@ from starlette.routing import Mount, Route
 
 from sql_service.mcp_server import mcp as credit_mcp
 from sql_service.rest_app import rest as rest_app
-from sql_service import db, seed as seed_module
+from sql_service import db, queries, seed as seed_module
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("bca.sql")
@@ -65,10 +65,19 @@ async def _reseed(_request) -> JSONResponse:
                          "error": _STATE["error"]})
 
 
+async def _tables(_request) -> JSONResponse:
+    """Read-only view of every table + row (for inspecting the seeded database)."""
+    try:
+        return JSONResponse({"database": "bcacredit", "tables": queries.dump_tables()})
+    except Exception as exc:  # noqa: BLE001
+        return JSONResponse({"error": str(exc)}, status_code=503)
+
+
 app = Starlette(
     routes=[
         Route("/health", _health),
         Route("/admin/reseed", _reseed, methods=["POST"]),
+        Route("/admin/tables", _tables),
         Mount("/mcp/credit", app=_credit_app),
         Mount("/", app=rest_app),
     ],

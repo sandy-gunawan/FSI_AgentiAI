@@ -10,7 +10,23 @@ of pymssql's ``%s`` — otherwise identical.)
 """
 from __future__ import annotations
 
+from datetime import date, datetime
+from decimal import Decimal
+
 from sql_service import db
+
+
+def _jsonable(row: dict) -> dict:
+    """Convert SQL types (Decimal / date / datetime) into JSON-safe values."""
+    out = {}
+    for k, v in row.items():
+        if isinstance(v, Decimal):
+            out[k] = float(v)
+        elif isinstance(v, (date, datetime)):
+            out[k] = v.isoformat()
+        else:
+            out[k] = v
+    return out
 
 
 def _one(sql: str, params: tuple) -> dict | None:
@@ -31,6 +47,27 @@ def _all(sql: str, params: tuple) -> list[dict]:
         return cur.fetchall()
     finally:
         conn.close()
+
+
+# Read-only table viewer (fixed table names, SELECT * — for the /admin/tables demo view).
+_VIEWABLE_TABLES = (
+    "clients", "facilities", "buyers", "buyer_exposure",
+    "payment_behaviour", "invoice_history", "watchlist",
+)
+
+
+def dump_tables() -> dict:
+    """Return every row of every table (read-only) — for viewing the seeded DB."""
+    out: dict = {}
+    conn = db.connect()
+    try:
+        cur = conn.cursor()
+        for t in _VIEWABLE_TABLES:
+            cur.execute(f"SELECT * FROM {t}")   # fixed identifier, no user input
+            out[t] = [_jsonable(r) for r in cur.fetchall()]
+    finally:
+        conn.close()
+    return out
 
 
 def get_client_facility(client_id: str) -> dict:

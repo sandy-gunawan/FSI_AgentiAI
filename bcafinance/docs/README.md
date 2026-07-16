@@ -14,6 +14,7 @@ Newbie-friendly guides for the agentic invoice-financing review demo. Read in or
 | 08 | [Observability](08-observability.md) | Logs in code + Foundry Traces |
 | 09 | [Structured data: SQL Server, REST vs MCP](09-sql-structured-data.md) | How an agent reads SQL; LLM params → tools; REST vs MCP (newbie) |
 | 10 | [MCP deep-dive (what/why/how/connect/code)](10-mcp-deep-dive.md) | Everything about MCP: connection, defining tools, code skeleton (newbie) |
+| 11 | [The database inside the container](11-database-in-container.md) | Where the DB lives, lifecycle, 4 ways to view it, full schema (newbie) |
 **Golden rule of this demo:** the LLM agents *reason and narrate*; the **binding
 decision is deterministic** (config-driven rules) — so it stays auditable and
 regulator-safe.
