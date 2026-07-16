@@ -97,6 +97,11 @@ A **read-only** endpoint that dumps every row of every table as JSON. It runs a 
 `SELECT * FROM <table>` for the 7 known tables — **no user SQL is ever accepted**, so it
 can't be abused ([sql_service/queries.py](../sql_service/queries.py) `dump_tables`).
 
+> **In the portal:** the app has a built-in **"Database (SQL)"** page
+> ([app/portal/views/5_Database.py](../app/portal/views/5_Database.py)) that calls this
+> endpoint and shows every table as a grid, plus row counts and a reseed button — the
+> no-code way to browse the data.
+
 Open it straight in a browser:
 
 ```
