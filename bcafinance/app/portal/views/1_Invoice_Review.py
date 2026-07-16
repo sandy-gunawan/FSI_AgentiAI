@@ -97,6 +97,14 @@ if samples:
 else:
     st.caption("💡 Belum ada faktur contoh. Jalankan: `python scripts/generate_sample_invoices.py`")
 
+st.markdown("#### 3 · Pengayaan data terstruktur (SQL Server) — opsional")
+enrich_opt = st.radio(
+    "Enrichment", ["Nonaktif", "🔵 REST tool → SQL", "🟢 MCP tool → SQL"],
+    horizontal=True, label_visibility="collapsed",
+    help="Agen Credit-Context membaca SQL Server (fasilitas, kredit pembeli, duplikat, "
+         "watchlist) via REST atau MCP — protokol berbeda, query SQL sama.")
+enrich = "rest" if enrich_opt.startswith("🔵") else "mcp" if enrich_opt.startswith("🟢") else "off"
+
 run = st.button("▶️ Jalankan Review (agen Foundry)", type="primary")
 
 # ---- Live flow ------------------------------------------------------------ #
@@ -146,7 +154,7 @@ if run:
     try:
         result, cost = run_async(run_invoice_review(
             image_bytes=image_bytes, source_name=source_name, mime=mime, mode=mode,
-            request_id=request_id, on_event=_on_event))
+            request_id=request_id, enrich=enrich, on_event=_on_event))
     except Exception as exc:
         st.error(f"Gagal menjalankan agen: {exc}")
         st.stop()
@@ -168,8 +176,9 @@ if run:
         metric_tile(m3, "Advance (80%)", rupiah(result.get("advance_amount_idr")))
         metric_tile(m4, "Metode", mode_label)
 
-        tab_rev, tab_ext, tab_gov, tab_tech = st.tabs(
-            ["🔎 Review (Agen 2)", "📤 Ekstraksi (Agen 1)", "🛡️ Audit & Biaya", "🔧 Log Teknis"])
+        tab_rev, tab_ext, tab_sql, tab_gov, tab_tech = st.tabs(
+            ["🔎 Review (Agen 2)", "📤 Ekstraksi (Agen 1)", "🏦 Konteks Kredit (SQL)",
+             "🛡️ Audit & Biaya", "🔧 Log Teknis"])
 
         with tab_rev:
             rev = result["review"]
@@ -213,6 +222,29 @@ if run:
                     st.caption("Tidak ada skor confidence (umum untuk Opsi B / Multimodal).")
                 with st.expander("JSON kanonik penuh"):
                     st.json(ex)
+
+        with tab_sql:
+            enr = result.get("enrichment")
+            if not enr:
+                st.info("Pengayaan SQL nonaktif. Pilih **REST** atau **MCP** di langkah 3 "
+                        "untuk membaca data terstruktur dari SQL Server 2019.")
+            else:
+                proto = enr.get("_protocol", "?").upper()
+                st.markdown(f"**Protokol:** `{proto}` → SQL Server 2019 "
+                            f"(agen `bca-credit-context-{enr.get('_protocol')}`)")
+                cinfo1, cinfo2 = st.columns(2)
+                with cinfo1:
+                    st.markdown("**Fasilitas klien**"); st.json(enr.get("facility", {}))
+                    st.markdown("**Perilaku bayar pembeli**"); st.json(enr.get("payment_behaviour", {}))
+                with cinfo2:
+                    st.markdown("**Kredit pembeli**"); st.json(enr.get("buyer", {}))
+                    st.markdown("**Duplikat / Watchlist**")
+                    st.json({"duplicate": enr.get("duplicate", {}), "watchlist": enr.get("watchlist", {})})
+                if enr.get("flags"):
+                    st.markdown("**Flag risiko (dari data SQL):**")
+                    st.markdown(pills(enr["flags"]), unsafe_allow_html=True)
+                if enr.get("summary"):
+                    st.success(enr["summary"])
 
         with tab_gov:
             g1, g2 = st.columns([3, 1])

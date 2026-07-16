@@ -21,12 +21,26 @@ from app.review import rules_engine
 from app.tools import doc_intelligence, tools_client
 from app.tools.json_utils import parse_json
 
+# Map extracted invoice parties -> SQL ids (seed data is fixed for the demo).
+_SELLER_ACCOUNT_TO_CLIENT = {
+    "8820-1177-9043": "CLI-01", "8811-2244-1090": "CLI-02", "8890-5533-2211": "CLI-03",
+    "8802-7788-6655": "CLI-04", "8877-1122-3344": "CLI-05",
+}
+_BUYER_NPWP_TO_ID = {
+    "01.234.567.8-901.000": "BUY-01", "02.345.678.9-012.000": "BUY-02",
+    "03.456.789.0-123.000": "BUY-03", "04.567.890.1-234.000": "BUY-04",
+    "05.678.901.2-345.000": "BUY-05",
+}
+
 
 async def run_invoice_review(
     *, image_bytes: bytes, source_name: str, mime: str, mode: ExtractionMode,
-    request_id: str, on_event=None,
+    request_id: str, enrich: str = "off", on_event=None,
 ) -> tuple[dict, dict]:
-    """Run the 2-agent invoice review. Returns (result, cost_summary)."""
+    """Run the 2-agent invoice review. ``enrich`` = off|rest|mcp (SQL credit context).
+
+    Returns (result, cost_summary).
+    """
     audit = get_audit_logger()
 
     def _emit(node: str, state: str, detail: str = "") -> None:
@@ -98,6 +112,26 @@ async def run_invoice_review(
         review = _to_review(parse_json(review_text))
         _emit("review", "done", f"🔎 **Agen 2** selesai · kelengkapan={review.data_sufficiency}")
 
+        # ---- Optional: SQL credit-context enrichment (REST or MCP) ---------- #
+        enrichment = None
+        if enrich in ("rest", "mcp"):
+            agent_key = f"bca-credit-context-{enrich}"
+            client_id = _SELLER_ACCOUNT_TO_CLIENT.get(extraction.seller.account, "CLI-01")
+            buyer_id = _BUYER_NPWP_TO_ID.get(extraction.buyer.npwp, "BUY-01")
+            _emit("enrich", "active",
+                  f"🏦 **Agen Credit-Context ({enrich.upper()})** membaca SQL Server · "
+                  f"client={client_id} buyer={buyer_id}")
+            enrich_text = await asyncio.to_thread(
+                runner.run, tool=f"foundry:credit-context-{enrich}", step="enrich",
+                agent_key=agent_key,
+                prompt=(f"client_id={client_id}, buyer_id={buyer_id}, "
+                        f"invoice_no={extraction.invoice_number or 'N/A'}, "
+                        f"buyer_npwp={extraction.buyer.npwp or 'N/A'}. "
+                        f"Panggil semua tool lalu rangkum konteks kredit."))
+            enrichment = parse_json(enrich_text)
+            enrichment["_protocol"] = enrich
+            _emit("enrich", "done", f"🏦 **Credit-Context ({enrich.upper()})** selesai")
+
         # ---- Deterministic binding decision --------------------------------- #
         _emit("decision", "active", "⚖️ **Mesin aturan** menghitung keputusan mengikat (deterministik)…")
         policy = rules_engine.evaluate(extraction, rules)
@@ -118,6 +152,7 @@ async def run_invoice_review(
         "decision_reasons": policy.reasons,
         "advance_amount_idr": policy.advance_amount_idr,
         "policy": rules["policy"],
+        "enrichment": enrichment,
     }
     return result, cost.summary()
 

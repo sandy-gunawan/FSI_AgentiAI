@@ -16,6 +16,8 @@ _ENDPOINT = {
     "foundry:extractor-di-agentic": ("FOUNDRY", "Foundry agent · bca-invoice-extractor-di-agentic (calls DI tool)"),
     "foundry:extractor-vision": ("FOUNDRY", "Foundry agent · bca-invoice-extractor-vision"),
     "foundry:reviewer": ("FOUNDRY", "Foundry agent · bca-invoice-reviewer"),
+    "foundry:credit-context-rest": ("FOUNDRY", "Foundry agent · bca-credit-context-rest (SQL via REST tool)"),
+    "foundry:credit-context-mcp": ("FOUNDRY", "Foundry agent · bca-credit-context-mcp (SQL via MCP tool)"),
     "blob:read-rules": ("BLOB GET", "Blob Storage · review_rules.yaml (hot-reload)"),
     "rules:evaluate": ("LOCAL", "Deterministic rules engine (config-driven)"),
 }

@@ -12,7 +12,7 @@ Newbie-friendly guides for the agentic invoice-financing review demo. Read in or
 | 06 | [Code walkthrough](06-code-walkthrough.md) | File-by-file, following one request |
 | 07 | [Config hot-reload (2 layers)](07-config-hot-reload.md) | Change the review "on the fly" |
 | 08 | [Observability](08-observability.md) | Logs in code + Foundry Traces |
-
+| 09 | [Structured data: SQL Server, REST vs MCP](09-sql-structured-data.md) | How an agent reads SQL; LLM params → tools; REST vs MCP (newbie) |
 **Golden rule of this demo:** the LLM agents *reason and narrate*; the **binding
 decision is deterministic** (config-driven rules) — so it stays auditable and
 regulator-safe.

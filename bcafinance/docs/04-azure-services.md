@@ -9,6 +9,7 @@ Everything lives in the **same resource group as the parent**: `rg-finance-agent
 | **Azure AI Document Intelligence** | Option A OCR (`prebuilt-invoice`) | Purpose-built for invoices; returns fields + confidence + boxes |
 | **Azure Container Apps** (`ca-bcafinance-portal`) | Runs the Streamlit portal | Reuses the parent's Container Apps environment; scales to zero |
 | **Azure Container Apps** (`ca-bcafinance-tools`) | Hosts the `analyze_invoice` **tool** the agentic extractor calls (Mode A+) | Small FastAPI wrapper over DI; single replica (in-memory image store) |
+| **Azure Container Apps** (`ca-bcafinance-sql`) | **SQL Server 2019** (sidecar) + credit-context tools (REST + MCP) | Real SQL 2019 engine for structured enrichment; Azure SQL blocked by policy (see doc 09) |
 | **Application Insights** | App-level telemetry (traces/metrics/logs) | Standard APM; pairs with Foundry Traces |
 | **Managed Identity** (on the Container App) | Passwordless auth to Foundry, Document Intelligence, and Blob | No secrets in the app |
 | **Azure App Configuration** *(optional)* | Enterprise alternative for hot-reload config | Versioning, labels, change audit (not required) |
