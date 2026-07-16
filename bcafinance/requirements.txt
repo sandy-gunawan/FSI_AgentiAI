@@ -1,0 +1,35 @@
+# ---- Microsoft Agent Framework (orchestration parity with parent repo) ----
+agent-framework
+
+# ---- Azure / Foundry ----
+azure-identity
+azure-ai-projects>=2.1.0
+openai
+
+# ---- Option A: Azure AI Document Intelligence (prebuilt-invoice OCR) ----
+azure-ai-documentintelligence
+
+# ---- Config hot-reload from Blob (optional) + image storage ----
+azure-storage-blob
+
+# ---- Observability (App Insights + local OTLP) ----
+azure-monitor-opentelemetry
+opentelemetry-exporter-otlp-proto-grpc
+
+# ---- Web portal ----
+streamlit
+pandas
+
+# ---- Core ----
+pydantic
+pydantic-settings
+python-dotenv
+pyyaml
+
+# ---- Sample invoice generation (PDF + PNG) ----
+reportlab
+pillow
+
+# ---- Provisioning script (clean OpenAPI if ever needed) ----
+jsonref
+httpx

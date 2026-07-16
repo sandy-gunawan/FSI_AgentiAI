@@ -1,0 +1,42 @@
+# ============================================================================
+# BCA Finance — Invoice Financing (Anjak Piutang) review rules
+# ----------------------------------------------------------------------------
+# This file is the SINGLE SOURCE OF POLICY for Agent 2 (reviewer) AND the
+# deterministic decision. Edit values here and re-run the SAME invoice — the
+# decision and the reviewer's guidance change WITHOUT redeploying or
+# re-provisioning any agent (read fresh on every request).
+#
+# In the cloud, upload this file to Blob (BLOB_CONTAINER_CONFIG) to change it
+# live. Locally, this file is used directly.
+# ============================================================================
+
+policy:
+  # Maximum single invoice we will finance (IDR).
+  max_facility_idr: 1000000000
+  # Advance ratio applied to the invoice total (0.80 = 80%).
+  advance_rate: 0.80
+  # Maximum payment term (issue_date -> due_date) we accept, in days.
+  max_tenor_days: 180
+  # Minimum OCR/extraction confidence per required field (0-1).
+  min_confidence: 0.75
+  # Informational: buyer concentration cap (share of book to one buyer).
+  max_buyer_concentration: 0.40
+
+# Fields that MUST be present for the data to be considered "sufficient".
+required_fields:
+  - invoice_number
+  - issue_date
+  - due_date
+  - total_amount_idr
+  - seller_name
+  - buyer_name
+  - buyer_npwp
+
+# Free-text guidance injected into the reviewer agent's prompt at call time.
+# Change wording here to steer the narrative WITHOUT re-provisioning the agent.
+reviewer_guidance: >
+  Terapkan kebijakan anjak piutang (invoice financing) BCA Finance sesuai norma
+  OJK/BI. Utamakan kelengkapan data, konsistensi aritmetika faktur (subtotal +
+  PPN = total), keabsahan NPWP pembeli, dan kecocokan rekening penjual. Jika ada
+  Purchase Order (PO) yang hilang atau NPWP pembeli berkeyakinan rendah, minta
+  dokumen pendukung sebelum pencairan. Tulis rekomendasi dalam Bahasa Indonesia.

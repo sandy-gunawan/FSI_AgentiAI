@@ -1,0 +1,20 @@
+# Local development stack for bcafinance.
+#   - portal (Streamlit) on :8502
+#   - Aspire dashboard (OpenTelemetry viewer) on :18889, OTLP on :4318
+services:
+  portal:
+    build:
+      context: .
+      dockerfile: Dockerfile.portal
+    ports:
+      - "8502:8501"
+    env_file:
+      - .env
+
+  aspire-dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:latest
+    environment:
+      - DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS=true
+    ports:
+      - "18889:18888"   # web UI
+      - "4318:18889"    # OTLP gRPC endpoint

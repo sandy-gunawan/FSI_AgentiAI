@@ -1,0 +1,19 @@
+# bcafinance — Streamlit portal + Foundry-hosted agents (Invoice Financing review)
+FROM python:3.13-slim
+
+WORKDIR /srv
+ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 PYTHONPATH=/srv
+
+COPY requirements.txt ./requirements.txt
+RUN pip install -r requirements.txt
+
+COPY app ./app
+COPY config ./config
+COPY scripts ./scripts
+
+# Generate the 20 sample invoices into the image (optional but handy for demos).
+RUN python scripts/generate_sample_invoices.py || true
+
+EXPOSE 8501
+CMD ["streamlit", "run", "app/portal/Home.py", \
+     "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]

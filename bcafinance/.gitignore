@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# Env & secrets
+.env
+
+# Local state
+data/audit.db
+data/agents.json
+.checkpoints/
+
+# Generated samples (regenerate with scripts/generate_sample_invoices.py)
+data/sample_invoices/
+
+# stray temp
+*.tmp
