@@ -28,10 +28,15 @@ The **agents do not call anything**; they receive text and return text.
 | Actor | What it calls | What it does |
 |-------|---------------|--------------|
 | Python orchestrator | DI, Agent 1, Agent 2, rules engine | conducts the whole flow, in order |
-| Document Intelligence | — | OCR only (Option A); returns fields+confidence to Python |
-| Agent 1 (Foundry) | — | text→text: normalize DI JSON, or read the image (Option B) |
+| Document Intelligence | — | OCR only; returns fields+confidence |
+| Agent 1 (Foundry) | — *(except Mode A+)* | text→text: normalize DI JSON, or read the image (Mode B) |
 | Agent 2 (Foundry) | — | text→text: review the extraction vs the POLICY block |
 | rules engine (Python) | reads `review_rules.yaml` | computes APPROVE/REFER/REJECT |
+
+> **The one exception:** in **Mode A+ (DI agentic)** Agent 1 *does* call Document
+> Intelligence itself, via the `analyze_invoice` **tool** attached to it in Foundry (served
+> by the `ca-bcafinance-tools` app). That is the genuinely agentic path — see
+> [03 · The three extraction modes](03-the-two-options.md).
 
 > Full line-level trace with code: [06 · Code walkthrough](06-code-walkthrough.md).
 

@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     doc_intelligence_endpoint: str = Field(default="", alias="DOC_INTELLIGENCE_ENDPOINT")
     doc_intelligence_key: str = Field(default="", alias="DOC_INTELLIGENCE_KEY")
 
+    # ---- Option 1 (agentic): the tools service the extractor agent calls ----
+    tools_service_url: str = Field(default="", alias="TOOLS_SERVICE_URL")
+
     # ---- Blob Storage (images + hot-reloadable review rules) ----
     blob_account_url: str = Field(default="", alias="BLOB_ACCOUNT_URL")
     blob_container_config: str = Field(default="bca-config", alias="BLOB_CONTAINER_CONFIG")
@@ -71,6 +74,10 @@ class Settings(BaseSettings):
     @property
     def doc_intelligence_configured(self) -> bool:
         return bool(self.doc_intelligence_endpoint)
+
+    @property
+    def tools_service_configured(self) -> bool:
+        return bool(self.tools_service_url)
 
     @property
     def blob_configured(self) -> bool:

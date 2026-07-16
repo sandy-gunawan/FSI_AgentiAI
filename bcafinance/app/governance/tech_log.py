@@ -11,7 +11,9 @@ _STORE: dict[str, list[dict]] = {}
 # logical tool -> (protocol, human label)
 _ENDPOINT = {
     "doc_intelligence:analyze": ("REST POST", "Azure AI Document Intelligence (prebuilt-invoice)"),
+    "tools:upload-image": ("REST POST", "bcafinance tools service · /images"),
     "foundry:extractor-di": ("FOUNDRY", "Foundry agent · bca-invoice-extractor-di"),
+    "foundry:extractor-di-agentic": ("FOUNDRY", "Foundry agent · bca-invoice-extractor-di-agentic (calls DI tool)"),
     "foundry:extractor-vision": ("FOUNDRY", "Foundry agent · bca-invoice-extractor-vision"),
     "foundry:reviewer": ("FOUNDRY", "Foundry agent · bca-invoice-reviewer"),
     "blob:read-rules": ("BLOB GET", "Blob Storage · review_rules.yaml (hot-reload)"),

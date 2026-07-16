@@ -93,6 +93,30 @@ So the **order of who-does-what** for Option A is:
 
 Governance is recorded at each step (`audit.record`, `cost.add`, `runner.tech.append`).
 
+## 2b. Mode A+ (DI agentic) — the agent calls DI itself
+
+This is the genuinely agentic path. The orchestrator does **not** call DI. Instead:
+
+```python
+elif mode == DOC_INTELLIGENCE_AGENTIC:
+    image_id = tools_client.upload_image(image_bytes)      # Python pre-uploads image -> id
+    extract_text = runner.run(
+        agent_key="bca-invoice-extractor-di-agentic",       # this agent HAS the analyze_invoice tool
+        prompt=f'Ekstrak faktur ini. image_id="{image_id}". '
+               f'Panggil tool analyze_invoice, lalu normalisasi.')
+```
+
+What happens on the wire:
+1. Python uploads the image to [tools_service/server.py](../tools_service/server.py) `POST /images` → gets an `image_id`.
+2. Python calls the agent with just that `image_id` (no DI call, no image inline).
+3. **Foundry runs the agent**, which decides to call its attached tool `analyze_invoice({image_id})`.
+4. Foundry invokes the tool **server-side** → the tools service runs Document Intelligence → returns fields.
+5. The agent reasons over the fields and returns canonical JSON.
+
+The tool is attached at provisioning time in [scripts/provision_agents.py](../scripts/provision_agents.py)
+via `OpenApiTool(OpenApiFunctionDefinition(spec=<tools /openapi.json>))`. So in this mode
+the "who calls DI" answer flips to: **the agent does.**
+
 ## 3. The runner — how Python actually invokes a Foundry agent
 [app/agents/shared/foundry_runner.py](../app/agents/shared/foundry_runner.py)
 

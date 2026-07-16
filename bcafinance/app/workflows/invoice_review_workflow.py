@@ -18,7 +18,7 @@ from app.core.models import ExtractionMode, InvoiceExtraction, ReviewResult
 from app.governance import tech_log
 from app.governance.audit_log import get_audit_logger
 from app.review import rules_engine
-from app.tools import doc_intelligence
+from app.tools import doc_intelligence, tools_client
 from app.tools.json_utils import parse_json
 
 
@@ -38,9 +38,12 @@ async def run_invoice_review(
 
     with foundry_session(request_id) as (runner, cost):
         # ---- Agent 1: extraction (mode-dependent) --------------------------- #
-        _emit("extract", "active",
-              f"📤 **Agen 1 — Ekstraksi** ({'Document Intelligence' if mode == ExtractionMode.DOC_INTELLIGENCE else 'Multimodal'}) "
-              f"membaca `{source_name}`…")
+        _labels = {
+            ExtractionMode.DOC_INTELLIGENCE: "Document Intelligence (Python memanggil DI)",
+            ExtractionMode.DOC_INTELLIGENCE_AGENTIC: "DI Agentic (agen memanggil DI via tool)",
+            ExtractionMode.MULTIMODAL: "Multimodal (agen membaca gambar)",
+        }
+        _emit("extract", "active", f"📤 **Agen 1 — Ekstraksi** ({_labels[mode]}) membaca `{source_name}`…")
 
         if mode == ExtractionMode.DOC_INTELLIGENCE:
             t0 = asyncio.get_event_loop().time()
@@ -55,6 +58,19 @@ async def run_invoice_review(
                 prompt=("Hasil OCR Document Intelligence (JSON mentah + confidence):\n"
                         + json.dumps(raw, ensure_ascii=False, default=str)
                         + "\n\nNormalisasi ke skema kanonik."))
+        elif mode == ExtractionMode.DOC_INTELLIGENCE_AGENTIC:
+            # Option 1: the AGENT calls DI itself via the tools-service OpenAPI tool.
+            t0 = asyncio.get_event_loop().time()
+            image_id = await asyncio.to_thread(tools_client.upload_image, image_bytes, source_name)
+            runner.tech.append({
+                "tool": "tools:upload-image", "args": f"{source_name} → image_id={image_id[:8]}…",
+                "result": "stored", "ms": round((asyncio.get_event_loop().time() - t0) * 1000, 1)})
+            extract_text = await asyncio.to_thread(
+                runner.run, tool="foundry:extractor-di-agentic", step="extract",
+                agent_key="bca-invoice-extractor-di-agentic",
+                prompt=(f"Ekstrak faktur ini. image_id = \"{image_id}\". "
+                        f"Panggil tool analyze_invoice dengan image_id tersebut, lalu "
+                        f"normalisasi hasilnya ke skema kanonik."))
         else:
             extract_text = await asyncio.to_thread(
                 runner.run_vision, tool="foundry:extractor-vision", step="extract",

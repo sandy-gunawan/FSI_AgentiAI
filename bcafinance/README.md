@@ -9,11 +9,12 @@ Indonesian financing use case: **invoice financing / anjak piutang**.
 
 Two extraction options, switchable in the UI:
 
-| | Option A | Option B |
-|---|----------|----------|
-| **Extractor** | Azure AI **Document Intelligence** (`prebuilt-invoice`) | **Multimodal** vision model (gpt-4o / gpt-4o-mini) |
-| **Agent 1** | `bca-invoice-extractor-di` (normalizes OCR) | `bca-invoice-extractor-vision` (reads image) |
-| **Agent 2** | `bca-invoice-reviewer` (shared) | `bca-invoice-reviewer` (shared) |
+| | Mode A · DI direct | Mode A+ · DI agentic | Mode B · Multimodal |
+|---|--------------------|----------------------|---------------------|
+| **Who calls DI** | Python orchestrator | **Agent 1 (tool call)** | nobody (vision reads image) |
+| **Agent 1** | `bca-invoice-extractor-di` | `bca-invoice-extractor-di-agentic` | `bca-invoice-extractor-vision` |
+| **Agent 2** | `bca-invoice-reviewer` (shared) | `bca-invoice-reviewer` (shared) | `bca-invoice-reviewer` (shared) |
+| **Truly agentic extract** | partial | ✅ yes | ✅ yes |
 
 Both agents are **hosted in Microsoft Foundry** (never built in code) and invoked by
 reference. Policy is **config-driven** and changeable **on the fly** (local YAML or Blob).

@@ -15,8 +15,9 @@ from pydantic import BaseModel, Field
 class ExtractionMode(str, Enum):
     """Which Agent-1 extraction path produced the fields."""
 
-    DOC_INTELLIGENCE = "doc_intelligence"  # Option A
-    MULTIMODAL = "multimodal"              # Option B
+    DOC_INTELLIGENCE = "doc_intelligence"            # Option 2: Python calls DI, agent normalizes
+    DOC_INTELLIGENCE_AGENTIC = "doc_intelligence_agentic"  # Option 1: agent calls DI as a tool
+    MULTIMODAL = "multimodal"                        # vision agent reads the image
 
 
 class Decision(str, Enum):

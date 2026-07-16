@@ -45,16 +45,35 @@ def _run_flow(ph, fs: FlowState, mode_label: str) -> None:
 left, right = st.columns([1, 1], gap="large")
 
 with left:
-    st.markdown("#### 1 · Pilih metode ekstraksi")
+    st.markdown("#### 1 · Pilih metode ekstraksi (Agen 1)")
     opt = st.radio(
-        "Metode", ["🅰️ Document Intelligence", "🅱️ Multimodal (Vision)"],
-        horizontal=True, label_visibility="collapsed",
+        "Metode",
+        ["🅰️ DI direct — Python panggil DI, agen normalisasi",
+         "🅰️➕ DI agentic — agen panggil DI sendiri (tool)",
+         "🅱️ Multimodal — agen baca gambar"],
+        label_visibility="collapsed",
     )
-    mode = ExtractionMode.DOC_INTELLIGENCE if opt.startswith("🅰️") else ExtractionMode.MULTIMODAL
-    mode_label = "Document Intelligence" if mode == ExtractionMode.DOC_INTELLIGENCE else "Multimodal (Vision)"
-    if mode == ExtractionMode.DOC_INTELLIGENCE and not settings.doc_intelligence_configured:
-        st.warning("⚠️ `DOC_INTELLIGENCE_ENDPOINT` belum diset — Opsi A akan gagal. "
-                   "Set di `.env` atau gunakan Opsi B.")
+    if opt.startswith("🅰️➕"):
+        mode = ExtractionMode.DOC_INTELLIGENCE_AGENTIC
+    elif opt.startswith("🅰️"):
+        mode = ExtractionMode.DOC_INTELLIGENCE
+    else:
+        mode = ExtractionMode.MULTIMODAL
+    mode_label = {
+        ExtractionMode.DOC_INTELLIGENCE: "DI direct",
+        ExtractionMode.DOC_INTELLIGENCE_AGENTIC: "DI agentic (tool)",
+        ExtractionMode.MULTIMODAL: "Multimodal (Vision)",
+    }[mode]
+    if mode in (ExtractionMode.DOC_INTELLIGENCE, ExtractionMode.DOC_INTELLIGENCE_AGENTIC) \
+            and not settings.doc_intelligence_configured:
+        st.warning("⚠️ `DOC_INTELLIGENCE_ENDPOINT` belum diset — mode DI akan gagal.")
+    if mode == ExtractionMode.DOC_INTELLIGENCE_AGENTIC and not settings.tools_service_configured:
+        st.warning("⚠️ `TOOLS_SERVICE_URL` belum diset — mode **DI agentic** butuh tools service.")
+    st.caption({
+        ExtractionMode.DOC_INTELLIGENCE: "1 langkah agentic (reviewer). DI dipanggil kode.",
+        ExtractionMode.DOC_INTELLIGENCE_AGENTIC: "2 agen. Agen 1 **memanggil DI sebagai tool** — truly agentic.",
+        ExtractionMode.MULTIMODAL: "2 agen. Agen 1 (vision) membaca gambar langsung.",
+    }[mode])
 
 with right:
     st.markdown("#### 2 · Unggah faktur atau pilih contoh")
@@ -65,19 +84,20 @@ with right:
 sample_dir = settings.sample_invoices_dir
 samples = sorted([p for p in sample_dir.glob("*.png")]) if sample_dir.exists() else []
 sample_choice = None
+_di_modes = (ExtractionMode.DOC_INTELLIGENCE, ExtractionMode.DOC_INTELLIGENCE_AGENTIC)
 if samples:
     names = ["— (pakai unggahan) —"] + [p.stem for p in samples]
     pick = st.selectbox("…atau pilih faktur contoh (20 tersedia)", names)
     if pick != names[0]:
-        # Prefer PDF for Option A (better OCR), PNG for Option B (image input).
+        # Prefer PDF for DI modes (better OCR), PNG for Multimodal (image input).
         stem = pick
         pdf = sample_dir / f"{stem}.pdf"
         png = sample_dir / f"{stem}.png"
-        sample_choice = (pdf if mode == ExtractionMode.DOC_INTELLIGENCE and pdf.exists() else png)
+        sample_choice = (pdf if mode in _di_modes and pdf.exists() else png)
 else:
     st.caption("💡 Belum ada faktur contoh. Jalankan: `python scripts/generate_sample_invoices.py`")
 
-run = st.button("▶️ Jalankan Review (2 agen Foundry)", type="primary")
+run = st.button("▶️ Jalankan Review (agen Foundry)", type="primary")
 
 # ---- Live flow ------------------------------------------------------------ #
 st.markdown("#### 🎬 Alur Agen — LIVE")

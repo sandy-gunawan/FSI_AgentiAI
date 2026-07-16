@@ -1,0 +1,9 @@
+# bcafinance tools service — Document Intelligence wrapper the extractor agent calls.
+FROM python:3.13-slim
+WORKDIR /srv
+ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 PYTHONPATH=/srv
+COPY tools_service/requirements.txt ./requirements.txt
+RUN pip install -r requirements.txt
+COPY tools_service ./tools_service
+EXPOSE 8000
+CMD ["uvicorn", "tools_service.server:app", "--host", "0.0.0.0", "--port", "8000"]

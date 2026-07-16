@@ -34,23 +34,56 @@ if str(_REPO_ROOT) not in sys.path:
 
 from azure.identity import DefaultAzureCredential  # noqa: E402
 from azure.ai.projects import AIProjectClient  # noqa: E402
-from azure.ai.projects.models import PromptAgentDefinition  # noqa: E402
+from azure.ai.projects.models import (  # noqa: E402
+    OpenApiAnonymousAuthDetails,
+    OpenApiFunctionDefinition,
+    OpenApiTool,
+    PromptAgentDefinition,
+)
+import httpx  # noqa: E402
 
 from app.core.config import get_settings  # noqa: E402
-from app.agents.invoice.agents import EXTRACTOR_DI, EXTRACTOR_VISION, REVIEWER  # noqa: E402
+from app.agents.invoice.agents import (  # noqa: E402
+    EXTRACTOR_DI,
+    EXTRACTOR_DI_AGENTIC,
+    EXTRACTOR_VISION,
+    REVIEWER,
+)
 
 
 @dataclass
 class AgentSpec:
     name: str
     instructions: str
+    openapi_tool: bool = False  # attach the tools-service analyze_invoice OpenAPI tool
 
 
 AGENTS: list[AgentSpec] = [
     AgentSpec("bca-invoice-extractor-di", EXTRACTOR_DI),
+    AgentSpec("bca-invoice-extractor-di-agentic", EXTRACTOR_DI_AGENTIC, openapi_tool=True),
     AgentSpec("bca-invoice-extractor-vision", EXTRACTOR_VISION),
     AgentSpec("bca-invoice-reviewer", REVIEWER),
 ]
+
+
+def _fetch_tools_openapi(base_url: str) -> dict:
+    """Fetch + clean the tools-service OpenAPI spec so Foundry accepts it as a tool."""
+    base_url = base_url.rstrip("/")
+    spec = httpx.get(f"{base_url}/openapi.json", timeout=30).json()
+    try:
+        import jsonref  # type: ignore
+
+        spec = json.loads(jsonref.dumps(jsonref.replace_refs(spec), default=str))
+    except Exception:
+        pass
+    for methods in spec.get("paths", {}).values():
+        if isinstance(methods, dict):
+            for op in methods.values():
+                if isinstance(op, dict):
+                    op.get("responses", {}).pop("422", None)
+    spec.pop("components", None)
+    spec["servers"] = [{"url": base_url}]
+    return spec
 
 
 def main() -> None:
@@ -68,22 +101,39 @@ def main() -> None:
     created: dict[str, dict] = {}
     failures: list[tuple[str, str]] = []
 
+    # Build the OpenAPI tool once (if the tools service URL is configured).
+    tools_url = s.tools_service_url
+    openapi_tool = None
+    if tools_url:
+        try:
+            spec = _fetch_tools_openapi(tools_url)
+            openapi_tool = OpenApiTool(openapi=OpenApiFunctionDefinition(
+                name="bca_invoice_tools", spec=spec,
+                description="Document Intelligence wrapper: analyze_invoice(image_id) returns invoice fields.",
+                auth=OpenApiAnonymousAuthDetails()))
+            print(f"Tools   : {tools_url} (OpenAPI tool attached to agentic agent)")
+        except Exception as exc:
+            print(f"Tools   : WARN could not fetch OpenAPI from {tools_url}: {exc}")
+
     with project:
-        for spec in AGENTS:
+        for spec_a in AGENTS:
             try:
+                tools = [openapi_tool] if (spec_a.openapi_tool and openapi_tool) else None
                 agent = project.agents.create_version(
-                    agent_name=spec.name,
-                    definition=PromptAgentDefinition(model=model, instructions=spec.instructions),
+                    agent_name=spec_a.name,
+                    definition=PromptAgentDefinition(model=model, instructions=spec_a.instructions,
+                                                     tools=tools),
                 )
-                created[spec.name] = {
+                created[spec_a.name] = {
                     "id": getattr(agent, "id", None),
-                    "name": getattr(agent, "name", spec.name),
+                    "name": getattr(agent, "name", spec_a.name),
                     "version": str(getattr(agent, "version", "")),
                 }
-                print(f"  OK  {spec.name:<30} v{created[spec.name]['version']}")
+                note = " [analyze_invoice tool]" if tools else ""
+                print(f"  OK  {spec_a.name:<34} v{created[spec_a.name]['version']}{note}")
             except Exception as exc:
-                failures.append((spec.name, str(exc)))
-                print(f"  FAIL {spec.name:<30} {exc}")
+                failures.append((spec_a.name, str(exc)))
+                print(f"  FAIL {spec_a.name:<34} {exc}")
 
     out_path = _REPO_ROOT / "data" / "agents.json"
     out_path.parent.mkdir(parents=True, exist_ok=True)

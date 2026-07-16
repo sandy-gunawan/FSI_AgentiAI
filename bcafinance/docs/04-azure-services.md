@@ -7,8 +7,8 @@ Everything lives in the **same resource group as the parent**: `rg-finance-agent
 | **Microsoft Foundry** (project `financing`) | Hosts the 3 prompt agents; runs the model | Reused from the parent — one place for agents, versioning, and Traces |
 | **Azure OpenAI model** (gpt-4o-mini, vision-capable) | The brains behind all 3 agents; also does Option B vision | `gpt-4o-mini` accepts images → serves both text and multimodal paths cheaply |
 | **Azure AI Document Intelligence** | Option A OCR (`prebuilt-invoice`) | Purpose-built for invoices; returns fields + confidence + boxes |
-| **Azure Blob Storage** | Stores uploaded invoice images **and** the hot-reloadable `review_rules.yaml` | Cheap object storage; editing the config blob changes policy live |
 | **Azure Container Apps** (`ca-bcafinance-portal`) | Runs the Streamlit portal | Reuses the parent's Container Apps environment; scales to zero |
+| **Azure Container Apps** (`ca-bcafinance-tools`) | Hosts the `analyze_invoice` **tool** the agentic extractor calls (Mode A+) | Small FastAPI wrapper over DI; single replica (in-memory image store) |
 | **Application Insights** | App-level telemetry (traces/metrics/logs) | Standard APM; pairs with Foundry Traces |
 | **Managed Identity** (on the Container App) | Passwordless auth to Foundry, Document Intelligence, and Blob | No secrets in the app |
 | **Azure App Configuration** *(optional)* | Enterprise alternative for hot-reload config | Versioning, labels, change audit (not required) |
