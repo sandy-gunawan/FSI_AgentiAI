@@ -16,12 +16,13 @@ inject_theme()
 
 home = st.Page("views/0_Home.py", title="Beranda", icon="🏠", default=True)
 review = st.Page("views/1_Invoice_Review.py", title="Review Faktur (Agen)", icon="🧾")
+policy = st.Page("views/4_Policy.py", title="Kebijakan Review", icon="⚙️")
 audit = st.Page("views/2_Audit_Governance.py", title="Audit & Governance", icon="🛡️")
 about = st.Page("views/3_About.py", title="Arsitektur & Cara Kerja", icon="📖")
 
 pg = st.navigation({
     "🏠 Beranda": [home],
-    "🧾 Pembiayaan Faktur": [review],
+    "🧾 Pembiayaan Faktur": [review, policy],
     "🛡️ Governance": [audit],
     "📖 Belajar": [about],
 })

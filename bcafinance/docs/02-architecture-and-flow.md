@@ -14,22 +14,46 @@
 | **Governance** | [audit_log.py](../app/governance/audit_log.py) · [cost_tracker.py](../app/governance/cost_tracker.py) · [tech_log.py](../app/governance/tech_log.py) | Audit trail, tokens/cost, technical proof |
 | **Observability** | [otel_setup.py](../app/observability/otel_setup.py) + Foundry Traces | App telemetry + agent-side traces |
 
+## ⚠️ Who calls whom (read this first)
+
+The **orchestration (plain Python)** is the conductor — it calls every service in order.
+The **agents do not call anything**; they receive text and return text.
+
+- **Document Intelligence is called by Python**, not by the agent. Python gets the raw
+  OCR JSON and *then* feeds it into Agent 1's prompt.
+- The agents have **no tools** attached in Foundry, so they *cannot* call DI, the rules
+  engine, or the internet. They are pure "text in → text out" reasoners.
+- The **binding decision** is made by Python (`rules_engine.evaluate`), not by an agent.
+
+| Actor | What it calls | What it does |
+|-------|---------------|--------------|
+| Python orchestrator | DI, Agent 1, Agent 2, rules engine | conducts the whole flow, in order |
+| Document Intelligence | — | OCR only (Option A); returns fields+confidence to Python |
+| Agent 1 (Foundry) | — | text→text: normalize DI JSON, or read the image (Option B) |
+| Agent 2 (Foundry) | — | text→text: review the extraction vs the POLICY block |
+| rules engine (Python) | reads `review_rules.yaml` | computes APPROVE/REFER/REJECT |
+
+> Full line-level trace with code: [06 · Code walkthrough](06-code-walkthrough.md).
+
 ## Component diagram
 
 ```mermaid
 flowchart LR
     SYS[External system / user] -->|invoice image| UI[Streamlit portal]
-    UI --> WF[invoice_review_workflow.py]
+    UI --> WF[invoice_review_workflow.py<br/>ORCHESTRATOR]
 
-    WF -->|mode A| DI[Azure AI Document Intelligence]
-    DI --> A1A[Agent 1: extractor-di]
-    WF -->|mode B| A1B[Agent 1: extractor-vision]
+    WF -->|A: 1 call DI| DI[Azure AI Document Intelligence]
+    DI -->|raw fields+confidence| WF
+    WF -->|A: 2 send DI JSON| A1A[Agent 1: extractor-di]
+    WF -->|B: send image| A1B[Agent 1: extractor-vision]
+    A1A -->|canonical JSON| WF
+    A1B -->|canonical JSON| WF
 
-    A1A --> A2[Agent 2: reviewer]
-    A1B --> A2
+    WF -->|extraction + POLICY block| A2[Agent 2: reviewer]
+    A2 -->|review JSON| WF
 
     WF --> CFG[(review_rules.yaml<br/>local or Blob)]
-    A2 --> RULES[rules_engine.py<br/>DETERMINISTIC]
+    WF --> RULES[rules_engine.py<br/>DETERMINISTIC]
     CFG --> RULES
     RULES --> OUT[Decision + review]
 

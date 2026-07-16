@@ -65,6 +65,32 @@ def load_rules(tech: list[dict] | None = None) -> dict[str, Any]:
     return dict(_DEFAULTS)
 
 
+def save_rules(rules: dict) -> str:
+    """Persist edited rules so the NEXT request picks them up (hot-reload, no redeploy).
+
+    Writes the local ``config/review_rules.yaml`` (read fresh by ``load_rules``) and, when
+    Blob is configured, also uploads to Blob. Returns the YAML text written.
+    """
+    merged = _merge(rules)
+    text = yaml.safe_dump(merged, allow_unicode=True, sort_keys=False)
+    s = get_settings()
+    s.local_rules_path.parent.mkdir(parents=True, exist_ok=True)
+    s.local_rules_path.write_text(text, encoding="utf-8")
+
+    if s.blob_configured:
+        try:
+            from azure.identity import DefaultAzureCredential
+            from azure.storage.blob import BlobServiceClient
+
+            svc = BlobServiceClient(account_url=s.blob_account_url,
+                                    credential=DefaultAzureCredential())
+            blob = svc.get_blob_client(container=s.blob_container_config, blob=s.review_rules_blob)
+            blob.upload_blob(text.encode("utf-8"), overwrite=True)
+        except Exception:
+            pass  # local write already succeeded
+    return text
+
+
 def _merge(loaded: dict) -> dict:
     out = {k: (dict(v) if isinstance(v, dict) else list(v) if isinstance(v, list) else v)
            for k, v in _DEFAULTS.items()}
