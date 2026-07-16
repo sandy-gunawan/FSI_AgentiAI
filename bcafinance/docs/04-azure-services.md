@@ -5,8 +5,8 @@ Everything lives in the **same resource group as the parent**: `rg-finance-agent
 | Service | Role in this demo | Why this one |
 |---------|-------------------|--------------|
 | **Microsoft Foundry** (project `financing`) | Hosts the 3 prompt agents; runs the model | Reused from the parent — one place for agents, versioning, and Traces |
-| **Azure OpenAI model** (gpt-4o-mini, vision-capable) | The brains behind all 3 agents; also does Option B vision | `gpt-4o-mini` accepts images → serves both text and multimodal paths cheaply |
-| **Azure AI Document Intelligence** | Option A OCR (`prebuilt-invoice`) | Purpose-built for invoices; returns fields + confidence + boxes |
+| **Azure OpenAI model** (gpt-4o-mini, vision-capable) | The brains behind all agents; also does the Multimodal vision path | `gpt-4o-mini` accepts images → serves both text and multimodal modes cheaply |
+| **Azure AI Document Intelligence** | OCR for the DI modes (`prebuilt-invoice`) | Purpose-built for invoices; returns fields + confidence + boxes |
 | **Azure Container Apps** (`ca-bcafinance-portal`) | Runs the Streamlit portal | Reuses the parent's Container Apps environment; scales to zero |
 | **Azure Container Apps** (`ca-bcafinance-tools`) | Hosts the `analyze_invoice` **tool** the agentic extractor calls (Mode A+) | Small FastAPI wrapper over DI; single replica (in-memory image store) |
 | **Azure Container Apps** (`ca-bcafinance-sql`) | **SQL Server 2019** (sidecar) + credit-context tools (REST + MCP) | Real SQL 2019 engine for structured enrichment; Azure SQL blocked by policy (see doc 09) |

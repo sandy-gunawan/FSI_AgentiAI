@@ -44,7 +44,7 @@ flowchart LR
 
 - **"Decision looks wrong"** → Audit tab: read the `final` row's decision + the technical
   log's `rules:evaluate` result; then check `config/review_rules.yaml`.
-- **"Extraction is off"** → Extraction tab: check `confidence`; compare Option A vs B.
+- **"Extraction is off"** → Extraction tab: check `confidence`; compare the extraction modes (DI direct / DI agentic / Multimodal).
 - **"Slow / expensive"** → cost tiles + technical log latency; Foundry Traces for the
   model-side breakdown.
 - **"Agent error"** → the portal surfaces the exception; Foundry Traces show the failed call.

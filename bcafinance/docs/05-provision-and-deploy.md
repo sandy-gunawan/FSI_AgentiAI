@@ -24,7 +24,7 @@ Copy-Item .env.example .env
 Fill in at minimum:
 - `FOUNDRY_PROJECT_ENDPOINT` (reuse the parent's `financing` endpoint)
 - `FOUNDRY_MODEL=gpt-4o-mini`
-- For **Option A**: `DOC_INTELLIGENCE_ENDPOINT` (and optionally `DOC_INTELLIGENCE_KEY`).
+- For the **DI modes** (A / A+): `DOC_INTELLIGENCE_ENDPOINT` (and optionally `DOC_INTELLIGENCE_KEY`).
 - Leave `BLOB_ACCOUNT_URL` empty to use the local `config/review_rules.yaml`.
 
 ### 3. Samples + agents

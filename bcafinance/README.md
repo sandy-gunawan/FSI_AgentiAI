@@ -4,10 +4,11 @@ A **self-contained** agentic demo (sibling of the parent `finance` project) for 
 Indonesian financing use case: **invoice financing / anjak piutang**.
 
 > An external system sends an invoice image → **Agent 1** extracts the details →
-> **Agent 2** reviews them against policy + data-sufficiency → a **deterministic rules
-> engine** issues the binding decision (APPROVE / REFER / REJECT).
+> **Agent 2** reviews them against policy + data-sufficiency → (optional) **Agent 3**
+> enriches with structured data from **SQL Server** → a **deterministic rules engine**
+> issues the binding decision (APPROVE / REFER / REJECT).
 
-Two extraction options, switchable in the UI:
+Three extraction modes, switchable in the UI:
 
 | | Mode A · DI direct | Mode A+ · DI agentic | Mode B · Multimodal |
 |---|--------------------|----------------------|---------------------|

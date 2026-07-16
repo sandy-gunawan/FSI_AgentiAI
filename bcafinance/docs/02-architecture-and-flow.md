@@ -4,7 +4,7 @@
 
 | Layer | Files | Role |
 |-------|-------|------|
-| **UI** | [app/portal/views/1_Invoice_Review.py](../app/portal/views/1_Invoice_Review.py) | Upload, Option A/B toggle, live flow, results |
+| **UI** | [app/portal/views/1_Invoice_Review.py](../app/portal/views/1_Invoice_Review.py) | Upload, 3-mode toggle, SQL enrichment toggle, live flow, results |
 | **Orchestration** | [app/workflows/invoice_review_workflow.py](../app/workflows/invoice_review_workflow.py) | Runs Agent 1 → Agent 2 → rules; plain Python |
 | **Runner** | [app/agents/shared/foundry_runner.py](../app/agents/shared/foundry_runner.py) | Calls Foundry agents by reference; records governance |
 | **Agents (remote)** | Microsoft Foundry project `financing` | 3 persistent prompt agents |
