@@ -37,6 +37,7 @@ from azure.ai.projects import AIProjectClient  # noqa: E402
 from azure.ai.projects.models import (  # noqa: E402
     OpenApiAnonymousAuthDetails,
     OpenApiFunctionDefinition,
+    MCPTool,
     OpenApiTool,
     PromptAgentDefinition,
 )
@@ -44,6 +45,7 @@ import httpx  # noqa: E402
 
 from app.core.config import get_settings  # noqa: E402
 from app.agents.invoice.agents import (  # noqa: E402
+    CREDIT_CONTEXT,
     EXTRACTOR_DI,
     EXTRACTOR_DI_AGENTIC,
     EXTRACTOR_VISION,
@@ -55,7 +57,9 @@ from app.agents.invoice.agents import (  # noqa: E402
 class AgentSpec:
     name: str
     instructions: str
-    openapi_tool: bool = False  # attach the tools-service analyze_invoice OpenAPI tool
+    openapi_tool: bool = False   # attach the analyze_invoice OpenAPI tool (tools service)
+    sql_openapi: bool = False    # attach the SQL credit REST (OpenAPI) tool
+    sql_mcp: bool = False        # attach the SQL credit MCP tool
 
 
 AGENTS: list[AgentSpec] = [
@@ -63,7 +67,40 @@ AGENTS: list[AgentSpec] = [
     AgentSpec("bca-invoice-extractor-di-agentic", EXTRACTOR_DI_AGENTIC, openapi_tool=True),
     AgentSpec("bca-invoice-extractor-vision", EXTRACTOR_VISION),
     AgentSpec("bca-invoice-reviewer", REVIEWER),
+    AgentSpec("bca-credit-context-rest", CREDIT_CONTEXT, sql_openapi=True),
+    AgentSpec("bca-credit-context-mcp", CREDIT_CONTEXT, sql_mcp=True),
 ]
+
+
+def _sql_op(op_id: str, props: dict, required: list[str]) -> dict:
+    return {
+        "post": {
+            "operationId": op_id,
+            "summary": op_id,
+            "requestBody": {"required": True, "content": {"application/json": {
+                "schema": {"type": "object", "properties": props, "required": required}}}},
+            "responses": {"200": {"description": "result",
+                          "content": {"application/json": {"schema": {"type": "object"}}}}},
+        }
+    }
+
+
+def _build_sql_openapi(base_url: str) -> dict:
+    """Hand-built OpenAPI 3.0.3 spec for the 5 SQL credit REST endpoints (Foundry-safe)."""
+    base_url = base_url.rstrip("/")
+    s = {"type": "string"}
+    return {
+        "openapi": "3.0.3",
+        "info": {"title": "bca-credit-rest", "version": "1.0.0"},
+        "servers": [{"url": base_url}],
+        "paths": {
+            "/get_client_facility": _sql_op("get_client_facility", {"client_id": s}, ["client_id"]),
+            "/get_buyer_credit": _sql_op("get_buyer_credit", {"buyer_id": s}, ["buyer_id"]),
+            "/get_buyer_payment_behaviour": _sql_op("get_buyer_payment_behaviour", {"buyer_id": s}, ["buyer_id"]),
+            "/check_duplicate_invoice": _sql_op("check_duplicate_invoice", {"invoice_no": s, "client_id": s}, ["invoice_no", "client_id"]),
+            "/check_watchlist": _sql_op("check_watchlist", {"npwp": s}, ["npwp"]),
+        },
+    }
 
 
 def _build_tools_openapi(base_url: str) -> dict:
@@ -143,10 +180,35 @@ def main() -> None:
         except Exception as exc:
             print(f"Tools   : WARN could not fetch OpenAPI from {tools_url}: {exc}")
 
+    # Build the SQL credit tools (REST OpenAPI + MCP) if the SQL service URL is set.
+    sql_url = s.sql_tools_url
+    sql_openapi_tool = None
+    sql_mcp_tool = None
+    if sql_url:
+        base = sql_url.rstrip("/")
+        try:
+            sql_openapi_tool = OpenApiTool(openapi=OpenApiFunctionDefinition(
+                name="bca_credit_sql", spec=_build_sql_openapi(base),
+                description="Credit-context lookups over SQL Server: facility, buyer credit, "
+                            "payment behaviour, duplicate invoice, watchlist.",
+                auth=OpenApiAnonymousAuthDetails()))
+            sql_mcp_tool = MCPTool(server_label="bca_credit",
+                                   server_url=f"{base}/mcp/credit/", require_approval="never")
+            print(f"SQL     : {base} (REST OpenAPI + MCP tools)")
+        except Exception as exc:
+            print(f"SQL     : WARN could not build SQL tools: {exc}")
+
     with project:
         for spec_a in AGENTS:
             try:
-                tools = [openapi_tool] if (spec_a.openapi_tool and openapi_tool) else None
+                tools = None
+                note = ""
+                if spec_a.openapi_tool and openapi_tool:
+                    tools = [openapi_tool]; note = " [analyze_invoice tool]"
+                elif spec_a.sql_openapi and sql_openapi_tool:
+                    tools = [sql_openapi_tool]; note = " [SQL REST tool]"
+                elif spec_a.sql_mcp and sql_mcp_tool:
+                    tools = [sql_mcp_tool]; note = " [SQL MCP tool]"
                 agent = project.agents.create_version(
                     agent_name=spec_a.name,
                     definition=PromptAgentDefinition(model=model, instructions=spec_a.instructions,
@@ -157,7 +219,6 @@ def main() -> None:
                     "name": getattr(agent, "name", spec_a.name),
                     "version": str(getattr(agent, "version", "")),
                 }
-                note = " [analyze_invoice tool]" if tools else ""
                 print(f"  OK  {spec_a.name:<34} v{created[spec_a.name]['version']}{note}")
             except Exception as exc:
                 failures.append((spec_a.name, str(exc)))

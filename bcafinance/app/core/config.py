@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     # ---- Option 1 (agentic): the tools service the extractor agent calls ----
     tools_service_url: str = Field(default="", alias="TOOLS_SERVICE_URL")
 
+    # ---- SQL credit-context service (REST + MCP over SQL Server 2019) ----
+    sql_tools_url: str = Field(default="", alias="SQL_TOOLS_URL")
+
     # ---- Blob Storage (images + hot-reloadable review rules) ----
     blob_account_url: str = Field(default="", alias="BLOB_ACCOUNT_URL")
     blob_container_config: str = Field(default="bca-config", alias="BLOB_CONTAINER_CONFIG")
@@ -78,6 +81,10 @@ class Settings(BaseSettings):
     @property
     def tools_service_configured(self) -> bool:
         return bool(self.tools_service_url)
+
+    @property
+    def sql_tools_configured(self) -> bool:
+        return bool(self.sql_tools_url)
 
     @property
     def blob_configured(self) -> bool:
