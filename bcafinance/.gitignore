@@ -17,3 +17,6 @@ data/sample_invoices/
 
 # stray temp
 *.tmp
+
+# generated deploy specs with secrets
+*.gen.yaml
