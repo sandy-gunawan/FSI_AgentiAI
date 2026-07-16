@@ -66,24 +66,52 @@ AGENTS: list[AgentSpec] = [
 ]
 
 
-def _fetch_tools_openapi(base_url: str) -> dict:
-    """Fetch + clean the tools-service OpenAPI spec so Foundry accepts it as a tool."""
-    base_url = base_url.rstrip("/")
-    spec = httpx.get(f"{base_url}/openapi.json", timeout=30).json()
-    try:
-        import jsonref  # type: ignore
+def _build_tools_openapi(base_url: str) -> dict:
+    """Hand-built minimal OpenAPI 3.0.3 spec for the analyze_invoice tool.
 
-        spec = json.loads(jsonref.dumps(jsonref.replace_refs(spec), default=str))
-    except Exception:
-        pass
-    for methods in spec.get("paths", {}).values():
-        if isinstance(methods, dict):
-            for op in methods.values():
-                if isinstance(op, dict):
-                    op.get("responses", {}).pop("422", None)
-    spec.pop("components", None)
-    spec["servers"] = [{"url": base_url}]
-    return spec
+    We do NOT reuse FastAPI's auto /openapi.json because FastAPI emits OpenAPI 3.1.0,
+    which the Foundry OpenAPI tool executor rejects ("Invalid OpenAPI specification").
+    A tiny, self-contained 3.0.3 spec with one operation is robust and Foundry-safe.
+    """
+    base_url = base_url.rstrip("/")
+    return {
+        "openapi": "3.0.3",
+        "info": {"title": "bca-invoice-tools", "version": "1.0.0"},
+        "servers": [{"url": base_url}],
+        "paths": {
+            "/analyze_invoice": {
+                "post": {
+                    "operationId": "analyze_invoice",
+                    "summary": "Run Azure AI Document Intelligence on a stored invoice image.",
+                    "description": "Given an image_id (from a prior upload), returns extracted "
+                                   "invoice fields with per-field confidence.",
+                    "requestBody": {
+                        "required": True,
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "image_id": {
+                                            "type": "string",
+                                            "description": "Id of the previously uploaded invoice image.",
+                                        }
+                                    },
+                                    "required": ["image_id"],
+                                }
+                            }
+                        },
+                    },
+                    "responses": {
+                        "200": {
+                            "description": "Extracted invoice fields (+ confidence).",
+                            "content": {"application/json": {"schema": {"type": "object"}}},
+                        }
+                    },
+                }
+            }
+        },
+    }
 
 
 def main() -> None:
@@ -106,7 +134,7 @@ def main() -> None:
     openapi_tool = None
     if tools_url:
         try:
-            spec = _fetch_tools_openapi(tools_url)
+            spec = _build_tools_openapi(tools_url)
             openapi_tool = OpenApiTool(openapi=OpenApiFunctionDefinition(
                 name="bca_invoice_tools", spec=spec,
                 description="Document Intelligence wrapper: analyze_invoice(image_id) returns invoice fields.",
