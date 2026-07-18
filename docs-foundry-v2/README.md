@@ -22,6 +22,7 @@ Read in this order (mirrors the v1 docs, but every page is about the **Foundry-h
 | 8 | [08-observability-and-analytics-foundry.md](08-observability-and-analytics-foundry.md) | **Bilingual (EN/ID)** two telemetry layers: app OpenTelemetry → App Insights **and** Foundry's built-in Traces/Monitor. |
 | 9 | [09-apim-ai-gateway.md](09-apim-ai-gateway.md) | **Bilingual (EN/ID)** optional **APIM AI Gateway**: per-transaction direct/APIM toggle for **both v1 & v2**, per-agent token metrics + thresholds, SKU choice (Developer, Indonesia Central), policies. |
 | 10 | [10-apim-implementation-reference.md](10-apim-implementation-reference.md) | **Bilingual (EN/ID)** APIM **implementation reference**: full setup CLI, how the code calls it, complete **policy XML for v1 & v2**, sample threshold use cases, everything else APIM can do, high-level + low-level **diagrams**, troubleshooting. |
+| 11 | [11-stateful-agentic-loops.md](11-stateful-agentic-loops.md) | **Newbie deep-dive:** what a **stateful agentic loop** (Foundry Agents v2 / Responses API) is, how it differs from our current **stateless** v2 calls, applied to Use Case 4 (Restructure) with code, sequence + fork **diagrams**, and exactly what would change in our repo. |
 
 > Diagrams use **Mermaid** (renders in VS Code preview + GitHub). Where the v1 doc already explains a
 > shared concept (e.g. the deterministic OJK/BI gate), this set links back to it instead of repeating.
