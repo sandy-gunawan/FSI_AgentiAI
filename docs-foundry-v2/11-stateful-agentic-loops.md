@@ -453,7 +453,113 @@ Concrete, file-level, if you decide to adopt this for one use case:
 
 ---
 
-## 13. The whole thing in six sentences (mental model)
+## 13. Stateful vs stateless — the map of *our 8 use cases*
+
+**Statefulness is not a global switch — it’s a per-use-case decision.** The right question for each
+use case is three sub-questions:
+
+1. **Memory** — does turn *N* need to *build on* turn *N-1*’s output?
+2. **Pause/Resume** — does the case stop and wait (human, long-running) then continue later?
+3. **Fork** — do you explore *multiple paths* from one expensive setup?
+
+If all three are “no”, **stateless is fine** (what we have today). The more “yes”, the more the
+stateful loop model pays off.
+
+```mermaid
+flowchart TB
+    subgraph STATELESS["🟢 Stateless is fine (single-pass, no carry-over)"]
+        UC1["UC1 · Retail Loan<br/><i>Prompt Chaining</i><br/>facts recomputed each step"]
+        UC3["UC3 · Customer Servicing<br/><i>Routing / Handoff</i><br/>classify once → one handler"]
+    end
+
+    subgraph HELPS["🟡 Stateful helps (multi-turn memory)"]
+        UC5["UC5 · AML / Fraud<br/><i>ReAct + human SAR gate</i><br/>tool loop + investigator pause"]
+        UC6["UC6 · Credit Committee<br/><i>Group Chat</i><br/>debate accumulates"]
+    end
+
+    subgraph STRONG["🔴 Stateful strongly (memory + resume/fork)"]
+        UC4["UC4 · Restructure<br/><i>Evaluator–Optimizer</i><br/>draft→critique→revise loop"]
+        UC2["UC2 · SME Financing<br/><i>Orchestrator + Human-in-loop</i><br/>pauses for Loan Officer"]
+        UC7["UC7 · Complex Investigation<br/><i>Magentic + task ledger</i><br/>plan → replan across turns"]
+    end
+
+    subgraph ORTHO["⚪ Orthogonal (different axis)"]
+        UC8["UC8 · Syndication<br/><i>A2A protocol</i><br/>cross-org delegation, not memory"]
+    end
+```
+
+### Why each use case lands where it does
+
+| UC | Pattern | Memory across turns? | Pause/Resume? | Fork? | Verdict |
+|----|---------|:--:|:--:|:--:|---------|
+| **1 Retail** | Prompt Chaining | ❌ each step recomputes facts | ❌ | ❌ | **Stateless** — no gain |
+| **3 Servicing** | Routing / Handoff | ❌ one intent → one handler | ❌ | ❌ | **Stateless** — no gain |
+| **5 AML/Fraud** | ReAct + human gate | ✅ tool observations chain | ✅ SAR gate | ➖ | **Stateful helps** |
+| **6 Committee** | Group Chat | ✅ debate builds up | ➖ | ➖ | **Stateful helps** (one conversation = the debate) |
+| **4 Restructure** | Evaluator–Optimizer | ✅✅ revise on critique | ➖ | ✅ compare schemes | **Stateful strongly** |
+| **2 SME** | Orchestrator + human | ✅ | ✅✅ waits for officer | ➖ | **Stateful strongly** (already uses [case_store.py](../app/workflows/case_store.py)) |
+| **7 Magentic** | Manager + task ledger | ✅✅ plan/replan | ✅ | ✅ | **Stateful strongly** |
+| **8 Syndication** | A2A | n/a | n/a | n/a | **Orthogonal** — cross-org, not a memory question |
+
+### The what / why / how, per tier
+
+**🟢 Stateless (UC1 Retail, UC3 Servicing)**
+- **What:** each agent call is independent; your Python passes freshly-computed facts every time.
+- **Why leave it:** the pipeline is single-pass and every fact is deterministic/recomputed, so a
+  server-side memory would just add moving parts for zero benefit.
+- **How:** unchanged — today’s `runner.run(agent_key=..., prompt=...)` with no `conversation`.
+
+**🟡 Stateful helps (UC5 AML, UC6 Committee)**
+- **What:** a multi-turn exchange where later turns should *see* earlier ones (tool observations in
+  ReAct; each panelist’s argument in the committee debate).
+- **Why:** holding that history in one Foundry `conversation` means you stop re-pasting the running
+  transcript into every prompt (fewer tokens, no truncation loss, cleaner code).
+- **How:** create one `conversation` per case; every agent turn passes the same `conversation.id`.
+
+**🔴 Stateful strongly (UC4 Restructure, UC2 SME, UC7 Magentic)**
+- **What:** long loops that refine/replan **and** stop for a human or explore variants.
+- **Why:** you get three wins at once — automatic memory, **resume-after-crash/pause**, and **fork**.
+  UC2 already persists a case for the Loan Officer; making the LLM history stateful lets the *agent’s*
+  reasoning resume too, not just the business record.
+- **How:** `conversation` (or `previous_response_id` chain) **plus** save the id to your own store
+  ([case_store.py](../app/workflows/case_store.py) pattern) so a paused case reopens the same desk.
+
+**⚪ Orthogonal (UC8 Syndication / A2A)**
+- **What:** the state question doesn’t apply — A2A is about *one bank’s agent delegating to another
+  organisation’s agent* over a protocol, not about remembering turns.
+- **Why/How:** decide statefulness *inside* each side’s own agent independently; the A2A hop itself is
+  a single request/response delegation.
+
+> 🧠 **Bottom line:** UC1 and UC3 gain nothing — leave them stateless. UC4, UC2, UC7 are the
+> highest-value candidates (memory **and** resume/fork). UC5 and UC6 benefit from server-held memory.
+> UC8 (A2A) is a separate axis entirely.
+
+### Advantages vs disadvantages (the honest trade-off)
+
+| | **Stateless (today)** | **Stateful loop model** |
+|---|---|---|
+| ✅ **Advantages** | Dead-simple, no server state to manage · fully deterministic & auditable · every prompt is self-contained (easy to log/replay) · cheapest for single-pass flows | Agent **remembers** its own drafts/critiques (no re-paste) · **resume** after crash/pause · **fork** to compare options from one setup · fewer tokens on long loops (no re-sending trimmed history) · standard tool-call item model |
+| ⚠️ **Disadvantages** | You hand-carry memory in Python (`critiques[]`) · you re-send & **truncate** history each loop (token cost + lost detail) · in-flight loop **lost on restart** · no built-in fork | Extra concept (`conversation`/`response.id`) to manage · must handle **context-window auto-truncation** for must-keep facts · server-side history has **retention/compliance** implications (use `store=False` if needed) · lifecycle/cleanup of conversations to avoid unbounded growth |
+| 🎯 **Best for** | UC1 Retail, UC3 Servicing | UC4 Restructure, UC2 SME, UC7 Magentic (strong); UC5 AML, UC6 Committee (helps) |
+
+> ✅ **Non-negotiable in both:** the deterministic **OJK/BI gate**, audit log, cost metering, content
+> safety, and APIM routing stay in your Python either way. Statefulness only relocates the *narrative
+> memory* — never the compliance decision.
+
+### Quick decision flow
+
+```mermaid
+flowchart LR
+    Q1{"Does turn N need<br/>turn N-1's output?"}
+    Q1 -- No --> S["🟢 Stateless<br/>(keep today's style)"]
+    Q1 -- Yes --> Q2{"Does it pause/resume<br/>or explore variants?"}
+    Q2 -- No --> H["🟡 Stateful conversation<br/>(memory only)"]
+    Q2 -- Yes --> R["🔴 Stateful + persist/fork<br/>(store conversation.id)"]
+```
+
+---
+
+## 14. The whole thing in six sentences (mental model)
 
 1. An **agent** is a named worker in Foundry; you already call yours by reference.
 2. Today each call is **amnesiac**, so **your Python is the memory** (you re-paste prior critiques).
@@ -481,7 +587,7 @@ flowchart LR
 
 ---
 
-## 14. Sources & further reading
+## 15. Sources & further reading
 - Microsoft Learn: [Design Stateful Agentic Loops with Microsoft Foundry Agent Service](https://learn.microsoft.com/en-us/training/modules/aaai-design-agentic-loops-azure-ai-agent-service/)
   (Units 2–7: run lifecycle, Responses API v2 model, reflection/planning, session state, fork, v1→v2 migration).
 - Your code: [foundry_runner.py](../app/agents/shared/foundry_runner.py) ·
